@@ -1,5 +1,6 @@
 [package]
 name = "infinity-grpc"
+description = "gRPC building blocks for Infinity"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

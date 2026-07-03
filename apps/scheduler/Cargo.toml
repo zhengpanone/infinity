@@ -1,5 +1,6 @@
 [package]
 name = "infinity-scheduler-server"
+description = "Infinity scheduled task server"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

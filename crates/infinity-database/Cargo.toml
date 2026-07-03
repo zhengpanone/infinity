@@ -1,5 +1,6 @@
 [package]
 name = "infinity-database"
+description = "Database access layer for Infinity"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

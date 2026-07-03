@@ -1,5 +1,6 @@
 [package]
 name = "infinity-web"
+description = "Web/HTTP building blocks for Infinity"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

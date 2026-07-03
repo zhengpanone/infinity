@@ -1,5 +1,6 @@
 [package]
 name = "infinity-admin-server"
+description = "Infinity admin management server"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

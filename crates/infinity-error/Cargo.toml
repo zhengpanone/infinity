@@ -1,5 +1,6 @@
 [package]
 name = "infinity-error"
+description = "Shared error types for Infinity"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

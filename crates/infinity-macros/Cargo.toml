@@ -1,5 +1,6 @@
 [package]
 name = "infinity-macros"
+description = "Procedural macros for Infinity"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

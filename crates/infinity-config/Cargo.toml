@@ -1,5 +1,6 @@
 [package]
 name = "infinity-config"
+description = "Layered configuration loading for Infinity"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

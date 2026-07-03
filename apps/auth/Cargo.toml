@@ -1,5 +1,6 @@
 [package]
 name = "infinity-auth-server"
+description = "Infinity authentication service server"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

@@ -1,5 +1,6 @@
 [package]
 name = "infinity-auth"
+description = "Authentication and authorization primitives for Infinity"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

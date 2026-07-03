@@ -1,5 +1,6 @@
 [package]
 name = "infinity-cache"
+description = "Caching abstractions and backends for Infinity"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

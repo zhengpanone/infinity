@@ -1,5 +1,6 @@
 [package]
 name = "infinity-ai-server"
+description = "Infinity AI service server"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

@@ -1,5 +1,6 @@
 [package]
 name = "infinity-wms-server"
+description = "Infinity WMS (warehouse management) server"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
