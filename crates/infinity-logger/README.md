@@ -1,351 +1,223 @@
-# 设计目标
+# Infinity Logger
 
-DESIGN.md：说明为什么这样设计（Why）
-ARCHITECTURE.md：说明如何实现（How）
+[![Crates.io](https://img.shields.io/crates/v/infinity-logger.svg)](https://crates.io/crates/infinity-logger)
+[![Documentation](https://docs.rs/infinity-logger/badge.svg)](https://docs.rs/infinity-logger)
+[![License](https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT-blue.svg)](LICENSE)
 
-整个 `logger` 需要满足下面几个原则：
+企业级日志组件，为 [Infinity Workspace](https://github.com/zhengpanone/infinity) 提供统一的日志基础设施。
 
-* **Builder 只负责配置**
-* **Logger 只负责生命周期管理**
-* **Layer 只负责日志格式**
-* **Writer 只负责输出**
-* **Middleware 只负责上下文**
-* **Config 可以来自 Builder、TOML、环境变量**
-* **后续支持热更新**
-* **后续支持 OTLP**
-* **所有模块单一职责**
+基于 Rust 官方 [tracing](https://github.com/tokio-rs/tracing) 生态构建，提供开箱即用的企业级日志能力。
 
----
+## ✨ 特性
 
-# 最终目录
+- 🚀 **开箱即用** - Builder API，零配置快速启动
+- 📝 **多种格式** - Console、JSON、结构化日志
+- 📁 **文件轮转** - 支持按日、按小时的日志轮转
+- 🔍 **链路追踪** - OpenTelemetry 集成
+- 🌐 **框架集成** - Axum、Tonic 中间件支持
+- ⚙️ **灵活配置** - Builder、TOML、环境变量
+- 🎯 **特性门控** - 按需启用功能，减小依赖
 
-```text
-logger/
-├── Cargo.toml
-├── README.md
-│
-├── src
-│   ├── lib.rs                # 对外导出
-│   ├── logger.rs             # Logger 生命周期
-│   ├── builder.rs            # Builder
-│   ├── config.rs             # 配置
-│   ├── error.rs              # 错误
-│   │
-│   ├── init.rs               # 初始化入口 ⭐⭐⭐
-│   │
-│   ├── layer/
-│   │   ├── mod.rs
-│   │   ├── console.rs
-│   │   ├── file.rs
-│   │   ├── json.rs
-│   │   └── otel.rs
-│   │
-│   ├── formatter/
-│   │   ├── mod.rs
-│   │   ├── console.rs
-│   │   ├── json.rs
-│   │   └── timer.rs
-│   │
-│   ├── writer/
-│   │   ├── mod.rs
-│   │   ├── rolling.rs
-│   │   ├── stdout.rs
-│   │   └── stderr.rs
-│   │
-│   ├── middleware/
-│   │   ├── mod.rs
-│   │   ├── axum.rs
-│   │   ├── grpc.rs
-│   │   └── request_id.rs
-│   │
-│   └── util/
-│       ├── mod.rs
-│       ├── time.rs
-│       ├── thread.rs
-│       └── hostname.rs
+## 📦 安装
+
+```toml
+[dependencies]
+infinity-logger = "0.1"
 ```
 
-这一版目录基本不会再变化。
+启用文件日志：
 
----
-
-# 模块关系
-
-```text
-                   Logger
-                      │
-                      ▼
-                LoggerBuilder
-                      │
-                      ▼
-                LoggerConfig
-                      │
-                      ▼
-             SubscriberFactory
-                      │
-        ┌─────────────┼──────────────┐
-        ▼             ▼              ▼
-   Formatter      Writer         Middleware
-        │             │              │
-        └─────────────┼──────────────┘
-                      ▼
-             tracing_subscriber
-                      │
-                      ▼
-                  Subscriber
+```toml
+[dependencies]
+infinity-logger = { version = "0.1", features = ["file"] }
 ```
 
----
+启用所有功能：
 
-# 初始化流程
+```toml
+[dependencies]
+infinity-logger = { version = "0.1", features = ["full"] }
+```
 
-以后真正初始化只有这一条路径：
+## 🚀 快速开始
+
+### 基础用法
 
 ```rust
-Logger::builder()
-    .level(LogLevel::Debug)
-    .file(true)
-    .json(false)
-    .init()?;
+use infinity_logger::Logger;
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    Logger::builder()
+        .init()?;
+
+    tracing::info!("Hello, Infinity!");
+    Ok(())
+}
 ```
 
-内部流程：
-
-```text
-Builder
-    │
-    ▼
-LoggerConfig
-    │
-    ▼
-SubscriberFactory
-    │
-    ▼
-Console Subscriber
-    │
-    ▼
-File Writer
-    │
-    ▼
-Subscriber::try_init()
-```
-
-Builder 不会直接接触 `tracing_subscriber`。
-
----
-
-# 为什么增加 SubscriberFactory？
-
-这是整个项目最重要的类。
-
-职责：
-
-* 创建 EnvFilter
-* 创建 Writer
-* 创建 Formatter
-* 创建 Subscriber
-* 注册 Subscriber
-* 后续支持 ReloadHandle
-
-Builder 完全不知道 tracing 的细节。
-
----
-
-# Writer 独立出来
-
-很多教程都会这样写：
+### 自定义配置
 
 ```rust
-fmt::layer()
-    .with_writer(file)
+use infinity_logger::{Logger, config::LogLevel};
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    Logger::builder()
+        .level(LogLevel::Debug)
+        .console(true)
+        .file(true)
+        .directory("./logs")
+        .filename("app")
+        .init()?;
+
+    tracing::debug!("Debug message");
+    tracing::info!("Application started");
+    Ok(())
+}
 ```
 
-但是以后：
+### 结构化日志
 
-* stdout
-* stderr
-* rolling file
-* 多文件
-* TCP
-* Kafka
-* Loki
-
-都会涉及 Writer。
-
-所以单独抽象：
-
-```text
-Writer
-│
-├── StdoutWriter
-├── RollingWriter
-├── JsonWriter
-└── MultiWriter
-```
-
-以后 Builder：
+启用 `json` feature：
 
 ```rust
-.file(true)
+use infinity_logger::Logger;
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    Logger::builder()
+        .json(true)
+        .init()?;
+
+    tracing::info!(user_id = 123, "User logged in");
+    Ok(())
+}
 ```
 
-只是修改 Config。
-
----
-
-# Formatter 独立
-
-以后 Console：
-
-```text
-INFO hello
-```
-
-JSON：
+输出：
 
 ```json
 {
-  "level":"INFO"
+  "timestamp": "2026-07-03T12:00:00Z",
+  "level": "INFO",
+  "target": "app",
+  "fields": {
+    "user_id": 123,
+    "message": "User logged in"
+  }
 }
 ```
 
-不是 Writer 决定。
+## 📋 功能特性
 
-而是：
+### 可用 Features
 
-```text
-Formatter
-```
+| Feature   | 描述                   | 默认 |
+|-----------|------------------------|------|
+| `console` | 控制台日志输出         | ✅   |
+| `file`    | 文件日志与轮转         | ❌   |
+| `json`    | JSON 格式日志          | ❌   |
+| `otel`    | OpenTelemetry 集成     | ❌   |
+| `axum`    | Axum 中间件            | ❌   |
+| `grpc`    | gRPC/Tonic 中间件      | ❌   |
+| `full`    | 启用所有功能           | ❌   |
 
-决定。
-
-所以：
-
-```text
-Formatter
-│
-├── ConsoleFormatter
-├── JsonFormatter
-└── TimerFormatter
-```
-
----
-
-# Middleware
-
-这里只负责：
-
-```text
-RequestId
-
-TraceId
-
-Span
-
-UserId
-
-TenantId
-```
-
-以后：
-
-Axum：
+### 日志轮转
 
 ```rust
-.layer(RequestIdLayer)
-```
+use infinity_logger::{Logger, config::Rotation};
 
-Tonic：
-
-```rust
-.interceptor(RequestInterceptor)
-```
-
-不会影响 Logger。
-
----
-
-# Telemetry
-
-这里以后完全独立：
-
-```text
-Telemetry
-│
-├── OTLP
-├── Jaeger
-├── Tempo
-├── Zipkin
-```
-
-Builder：
-
-```rust
-.telemetry(true)
-```
-
-即可。
-
----
-
-# Builder 最终效果
-
-```rust
 Logger::builder()
-    .level(LogLevel::Debug)
-    .console(true)
     .file(true)
-    .json(false)
     .directory("./logs")
-    .filename("infinity")
-    .rotation(Rotation::Daily)
-    .ansi(true)
-    .with_target(true)
-    .with_thread_name(true)
-    .with_thread_id(true)
-    .with_file(true)
-    .with_line_number(true)
+    .filename("application")
+    .rotation(Rotation::Daily)  // 每日轮转
     .init()?;
 ```
 
-Builder 永远不接触 tracing。
+支持的轮转策略：
+- `Rotation::Never` - 不轮转
+- `Rotation::Minutely` - 每分钟（测试用）
+- `Rotation::Hourly` - 每小时
+- `Rotation::Daily` - 每日
 
----
+### Axum 集成
 
-# 我建议再升级一个层次（也是我最推荐的方案）
-
-如果目标是把 **Infinity** 打造成企业级平台，我建议 `logger` 不要直接依赖 `tracing_subscriber`。
-
-可以新增一个 **backend** 抽象层：
-
-```text
-Logger
-     │
-     ▼
-Backend Trait
-     │
- ┌───┴────────────┐
- ▼                ▼
-Tracing      OpenTelemetry
-```
-
-定义：
+启用 `axum` feature：
 
 ```rust
-pub trait LogBackend {
-    fn init(&self, config: &LoggerConfig) -> Result<()>;
+use axum::{Router, routing::get};
+use infinity_logger::Logger;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    Logger::builder().init()?;
+
+    let app = Router::new()
+        .route("/", get(|| async { "Hello, World!" }));
+
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;
+    axum::serve(listener, app).await?;
+    Ok(())
 }
 ```
 
-默认实现：
+### OpenTelemetry
 
-```text
-TracingBackend
+启用 `otel` feature：
+
+```rust
+use infinity_logger::Logger;
+
+Logger::builder()
+    .init()?;
+
+tracing::info!("This trace will be exported to OpenTelemetry collectors");
 ```
 
-以后如果某些场景需要直接接入 OpenTelemetry SDK，而不经过 `tracing_subscriber`，甚至需要适配其他日志实现，就无需修改 `LoggerBuilder` 和业务代码，只需新增一个 Backend 实现。
+## 📚 文档
+
+- [设计文档](docs/DESIGN.md) - 设计理念与目标
+- [架构文档](docs/ARCHITECTURE.md) - 内部架构说明
+- [配置指南](docs/CONFIGURATION.md) - 详细配置说明
+- [测试指南](docs/TESTING.md) - 测试策略
+- [贡献指南](docs/CONTRIBUTING.md) - 如何参与贡献
+- [路线图](docs/ROADMAP.md) - 开发计划
+
+## 🎯 设计原则
+
+1. **Official First** - 优先使用 `tracing` 官方能力，不重复造轮子
+2. **Configuration Driven** - 配置驱动，行为可预测
+3. **Composition over Inheritance** - 组合优于继承
+4. **Single Responsibility** - 每个模块职责单一
+5. **Feature Gate** - 高级功能按需启用
+
+## 🤝 贡献
+
+欢迎贡献！请阅读 [CONTRIBUTING.md](docs/CONTRIBUTING.md) 了解详情。
+
+提交前请确保：
+
+```bash
+cargo fmt
+cargo clippy --all-features -- -D warnings
+cargo test --all-features
+cargo doc --no-deps
+```
+
+## 📄 许可证
+
+本项目采用以下任一许可证：
+
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE))
+- MIT license ([LICENSE-MIT](LICENSE-MIT))
+
+由你选择。
+
+## 🔗 相关项目
+
+- [tracing](https://github.com/tokio-rs/tracing) - Rust 官方追踪框架
+- [tracing-subscriber](https://github.com/tokio-rs/tracing) - Subscriber 实现
+- [OpenTelemetry](https://opentelemetry.io/) - 可观测性标准
 
 ---
 
-**我建议从这里开始重新实现代码，而不是继续修补之前的版本。**
-接下来我们将按照这份架构，从 **`subscriber/factory.rs`** 开始，一步一步实现，保证整个项目最终能够直接 `cargo test`、`cargo clippy`、`cargo doc` 全部通过，并达到可开源发布的质量。
+**Made with ❤️ for the Infinity Workspace**
