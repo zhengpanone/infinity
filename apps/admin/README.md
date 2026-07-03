@@ -153,7 +153,7 @@ cargo run -p infinity-admin-server
 
 当前为骨架示例，后续计划：
 
-- [ ] 接入 `infinity-config` 加载配置
+- [x] 接入 `infinity-config` 加载配置
 - [ ] 接入 `infinity-database` 连接数据库
 - [ ] 接入 `infinity-web` 提供 HTTP 接口
 - [ ] 管理员认证与权限（`infinity-auth`）
