@@ -1,0 +1,13 @@
+[database]
+url = "postgres://postgres:postgres@localhost/infinity_test"
+max_connections = 5
+
+[redis]
+host = "127.0.0.1"
+port = 6379
+
+[ai]
+provider = "mock"
+
+[logger]
+level = "debug"

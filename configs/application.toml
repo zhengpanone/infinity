@@ -1,6 +1,22 @@
 [app]
 name = "Infinity"
+version = "0.1.0"
 
 [server]
 host = "0.0.0.0"
 port = 8080
+
+[database]
+url = "postgres://postgres:postgres@localhost/infinity"
+max_connections = 10
+
+[redis]
+host = "127.0.0.1"
+port = 6379
+
+[ai]
+provider = "openai"
+
+[logger]
+level = "info"
+json = false

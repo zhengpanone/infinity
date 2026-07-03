@@ -1,1 +1,1 @@
-//! 集成测试入口模块
+//! Integration test module marker.

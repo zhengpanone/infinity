@@ -1,2 +1,9 @@
 [server]
 port = 80
+
+[database]
+max_connections = 50
+
+[logger]
+level = "info"
+json = true
