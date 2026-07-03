@@ -549,7 +549,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "infinity-admin"
+name = "infinity-admin-server"
 version = "0.1.0"
 
 [[package]]
@@ -595,11 +595,11 @@ name = "infinity-erp-server"
 version = "0.1.0"
 
 [[package]]
-name = "infinity-errors"
+name = "infinity-error"
 version = "0.1.0"
 
 [[package]]
-name = "infinity-gateway"
+name = "infinity-gateway-server"
 version = "0.1.0"
 
 [[package]]
@@ -637,7 +637,7 @@ name = "infinity-macros"
 version = "0.1.0"
 
 [[package]]
-name = "infinity-scheduler"
+name = "infinity-scheduler-server"
 version = "0.1.0"
 
 [[package]]
