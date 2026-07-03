@@ -626,6 +626,12 @@ dependencies = [
 [[package]]
 name = "infinity-admin-server"
 version = "0.1.0"
+dependencies = [
+ "infinity-common",
+ "infinity-logger",
+ "infinity-utils",
+ "tracing",
+]
 
 [[package]]
 name = "infinity-ai-server"

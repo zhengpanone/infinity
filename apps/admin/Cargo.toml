@@ -13,3 +13,7 @@ name = "admin"
 path = "src/main.rs"
 
 [dependencies]
+infinity-logger = { path = "../../crates/infinity-logger" }
+infinity-common = { path = "../../crates/infinity-common" }
+infinity-utils = { path = "../../crates/infinity-utils" }
+tracing.workspace = true
