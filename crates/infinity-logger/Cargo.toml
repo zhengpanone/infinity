@@ -47,6 +47,8 @@ tracing-subscriber = { version = "0.3", features = [
     "registry",
     "json",
     "ansi",
+    "time",
+    "local-time",
 ] }
 
 # file

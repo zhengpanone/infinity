@@ -16,11 +16,8 @@ pub fn layer(config: &LoggerConfig) -> Option<impl Layer<Registry> + Send + Sync
         crate::config::Rotation::Daily => Rotation::DAILY,
     };
 
-    let file_appender = RollingFileAppender::new(
-        rotation,
-        &config.file.directory,
-        &config.file.filename,
-    );
+    let file_appender =
+        RollingFileAppender::new(rotation, &config.file.directory, &config.file.filename);
 
     let layer = fmt::layer()
         .with_writer(file_appender)

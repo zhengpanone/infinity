@@ -1,3 +1,7 @@
+//! 日志配置类型。
+//!
+//! 所有 Builder 方法最终都会修改 [`LoggerConfig`]，初始化时统一消费此配置。
+
 use serde::{Deserialize, Serialize};
 
 /// Logger配置
@@ -17,7 +21,7 @@ pub struct LoggerConfig {
     pub json: JsonConfig,
 
     /// 日志格式
-    pub format: FormatConfnig,
+    pub format: FormatConfig,
 }
 
 impl Default for LoggerConfig {
@@ -27,25 +31,20 @@ impl Default for LoggerConfig {
             console: ConsoleConfig::default(),
             file: FileConfig::default(),
             json: JsonConfig::default(),
-            format: FormatConfnig::default(),
+            format: FormatConfig::default(),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum LogLevel {
     Trace,
     Debug,
+    #[default]
     Info,
     Warn,
     Error,
-}
-
-impl Default for LogLevel {
-    fn default() -> Self {
-        Self::Info
-    }
 }
 
 impl LogLevel {
@@ -119,7 +118,7 @@ impl Default for FileConfig {
     }
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Rotation {
     Never,
@@ -128,13 +127,8 @@ pub enum Rotation {
 
     Hourly,
 
+    #[default]
     Daily,
-}
-
-impl Default for Rotation {
-    fn default() -> Self {
-        Self::Daily
-    }
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -159,7 +153,7 @@ impl Default for JsonConfig {
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[serde(default)]
-pub struct FormatConfnig {
+pub struct FormatConfig {
     pub with_target: bool,
 
     pub with_file: bool,
@@ -175,7 +169,7 @@ pub struct FormatConfnig {
     pub with_timer: bool,
 }
 
-impl Default for FormatConfnig {
+impl Default for FormatConfig {
     fn default() -> Self {
         Self {
             with_target: true,
@@ -186,5 +180,70 @@ impl Default for FormatConfnig {
             with_level: true,
             with_timer: true,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_default_config() {
+        let config = LoggerConfig::default();
+        assert_eq!(config.level, LogLevel::Info);
+        assert!(config.console.enabled);
+        assert!(!config.file.enabled);
+        assert!(!config.json.enabled);
+    }
+
+    #[test]
+    fn test_log_level_as_str() {
+        assert_eq!(LogLevel::Trace.as_str(), "trace");
+        assert_eq!(LogLevel::Debug.as_str(), "debug");
+        assert_eq!(LogLevel::Info.as_str(), "info");
+        assert_eq!(LogLevel::Warn.as_str(), "warn");
+        assert_eq!(LogLevel::Error.as_str(), "error");
+    }
+
+    #[test]
+    fn test_default_rotation() {
+        assert_eq!(Rotation::default(), Rotation::Daily);
+    }
+
+    #[test]
+    fn test_default_file_config() {
+        let config = FileConfig::default();
+        assert_eq!(config.directory, "./logs");
+        assert_eq!(config.filename, "application");
+        assert_eq!(config.max_file, 30);
+    }
+
+    #[test]
+    fn test_config_serialization() {
+        let config = LoggerConfig::default();
+        let toml = toml::to_string(&config).expect("serialize");
+        assert!(toml.contains("level = \"info\""));
+    }
+
+    #[test]
+    fn test_config_deserialization() {
+        let toml = r#"
+            level = "debug"
+
+            [console]
+            enabled = true
+        "#;
+        let config: LoggerConfig = toml::from_str(toml).expect("deserialize");
+        assert_eq!(config.level, LogLevel::Debug);
+        assert!(config.console.enabled);
+    }
+
+    #[test]
+    fn test_config_roundtrip() {
+        let config = LoggerConfig::default();
+        let toml = toml::to_string(&config).expect("serialize");
+        let parsed: LoggerConfig = toml::from_str(&toml).expect("deserialize");
+        assert_eq!(parsed.level, config.level);
+        assert_eq!(parsed.file.rotation, config.file.rotation);
     }
 }

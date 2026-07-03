@@ -1,5 +1,5 @@
 use opentelemetry::trace::TracerProvider;
-use opentelemetry_sdk::{trace::SdkTracerProvider, Resource};
+use opentelemetry_sdk::{Resource, trace::SdkTracerProvider};
 use tracing_opentelemetry::OpenTelemetryLayer;
 use tracing_subscriber::{Layer, Registry};
 

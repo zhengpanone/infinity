@@ -1,6 +1,6 @@
-//! # logger
+//! # infinity-logger
 //!
-//! 企业级日志组件。
+//! 企业级日志组件，为 Infinity Workspace 提供统一的日志基础设施。
 //!
 //! 基于 `tracing` 构建，支持：
 //!
@@ -16,9 +16,9 @@
 //! 推荐初始化：
 //!
 //! ```no_run
-//! use logger::Logger;
+//! use infinity_logger::Logger;
 //!
-//! fn main() -> Result<(), logger::LoggerError> {
+//! fn main() -> Result<(), infinity_logger::LoggerError> {
 //!     Logger::builder()
 //!         .init()?;
 //!
@@ -30,18 +30,16 @@
 pub mod builder;
 pub mod config;
 pub mod error;
-pub mod init;
-pub mod subscriber;
-
 pub mod logger;
+
+mod init;
 
 #[cfg(feature = "console")]
 pub mod formatter;
 
-#[cfg(feature = "console")]
 pub mod layer;
 
-#[cfg(feature = "axum")]
+#[cfg(any(feature = "axum", feature = "grpc"))]
 pub mod middleware;
 
 pub mod macros;
@@ -59,8 +57,8 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 /// 等价于：
 ///
 /// ```no_run
-/// logger::Logger::builder().init()?;
-/// # Ok::<(), logger::LoggerError>(())
+/// infinity_logger::Logger::builder().init()?;
+/// # Ok::<(), infinity_logger::LoggerError>(())
 /// ```
 #[inline]
 pub fn init() -> Result<()> {

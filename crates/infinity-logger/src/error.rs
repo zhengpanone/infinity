@@ -1,3 +1,8 @@
+//! 统一错误类型。
+//!
+//! 所有公开 API 返回 [`Result`]，错误统一转换为 [`LoggerError`]，
+//! 禁止向外暴露第三方错误类型。
+
 use std::io;
 
 use thiserror::Error;
@@ -43,5 +48,35 @@ impl LoggerError {
     /// 快速创建普通错误
     pub fn message(msg: impl Into<String>) -> Self {
         Self::Message(msg.into())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_invalid_config_display() {
+        let err = LoggerError::invalid("bad path");
+        assert_eq!(err.to_string(), "invalid configuration: bad path");
+    }
+
+    #[test]
+    fn test_message_display() {
+        let err = LoggerError::message("boom");
+        assert_eq!(err.to_string(), "boom");
+    }
+
+    #[test]
+    fn test_already_initialized_display() {
+        let err = LoggerError::AlreadyInitialized;
+        assert_eq!(err.to_string(), "logger has already been initialized");
+    }
+
+    #[test]
+    fn test_from_io_error() {
+        let io_err = io::Error::new(io::ErrorKind::NotFound, "missing");
+        let err: LoggerError = io_err.into();
+        assert!(matches!(err, LoggerError::Io(_)));
     }
 }
