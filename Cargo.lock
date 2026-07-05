@@ -499,6 +499,9 @@ version = "0.1.0"
 [[package]]
 name = "infinity-error"
 version = "0.1.0"
+dependencies = [
+ "thiserror",
+]
 
 [[package]]
 name = "infinity-gateway-server"
