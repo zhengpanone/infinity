@@ -5,6 +5,7 @@ use crate::{error::ConfigError, error::Result, traits::Validate};
 /// 服务监听配置。
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(default)]
+#[non_exhaustive]
 pub struct ServerConfig {
     pub host: String,
     pub port: u16,

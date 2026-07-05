@@ -5,6 +5,7 @@ use crate::{error::ConfigError, error::Result, traits::Validate};
 /// Redis 连接配置。
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(default)]
+#[non_exhaustive]
 pub struct RedisConfig {
     pub host: String,
 

@@ -5,6 +5,7 @@ use crate::{error::ConfigError, error::Result, traits::Validate};
 /// 应用基础信息。
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(default)]
+#[non_exhaustive]
 pub struct AppInfo {
     pub name: String,
 

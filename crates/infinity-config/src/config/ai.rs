@@ -5,6 +5,7 @@ use crate::{error::ConfigError, error::Result, traits::Validate};
 /// AI 提供商配置。
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(default)]
+#[non_exhaustive]
 pub struct AiConfig {
     pub provider: String,
 

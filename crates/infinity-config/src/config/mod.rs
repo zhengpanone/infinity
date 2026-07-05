@@ -22,6 +22,7 @@ use crate::{error::Result, traits::Validate};
 
 /// 完整的应用配置。
 #[derive(Debug, Clone, Deserialize, Serialize)]
+#[non_exhaustive]
 #[serde(default)]
 pub struct AppConfig {
     pub app: AppInfo,
@@ -68,9 +69,4 @@ impl Validate for AppConfig {
 
         Ok(())
     }
-}
-
-/// 为旧调用方保留的兼容路径，支持 `config::config::AppConfig`。
-pub mod config {
-    pub use super::AppConfig;
 }

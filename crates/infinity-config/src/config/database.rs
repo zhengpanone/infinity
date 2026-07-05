@@ -5,6 +5,7 @@ use crate::{error::ConfigError, error::Result, traits::Validate};
 /// 数据库连接配置。
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(default)]
+#[non_exhaustive]
 pub struct DatabaseConfig {
     pub url: String,
 
