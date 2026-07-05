@@ -37,9 +37,14 @@
 
 ## Milestone 4：可观测性
 
-- [ ] 添加结构化错误日志规范
-- [ ] 记录 trace/span 中建议携带的错误字段
-- [ ] 基于 `ErrorKind::code()` 定义 metrics label
+- [x] 添加结构化错误日志规范
+- [x] 记录 trace/span 中建议携带的错误字段
+- [x] 基于 `ErrorKind::code()` 定义 metrics label
+
+> 说明：新增 `ErrorClass`（`client` / `server`）、`InfinityError::class()`、
+> `chain()` / `chain_string()` / `root_cause()` 与 `field` 字段键常量模块，均为零依赖
+> 原语；具体记录动作在持有 `tracing` / `metrics` 依赖的边界处进行。规范见
+> [OBSERVABILITY.md](OBSERVABILITY.md)。
 
 ## Milestone 5：API 冻结
 

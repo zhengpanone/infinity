@@ -12,6 +12,7 @@ Infinity 工作区共享错误基础设施。
 - `ResultExt`：在 crate 边界一行把第三方 `Result` 转换为工作区错误，并保留类型化来源链
 - `bail!` / `ensure!`：以指定分类快速返回错误的宏
 - 默认 HTTP 状态码映射，方便后续 Web/API 层使用
+- 可观测性原语：`ErrorClass`（client/server）、错误链 `chain` / `root_cause`、`error.*` 字段键常量
 - 低依赖设计，避免基础设施 crate 之间产生循环依赖
 
 ## 快速开始
@@ -93,6 +94,25 @@ fn map_database_error(message: impl Into<String>) -> InfinityError {
 
 这样可以让 `infinity-error` 保持独立，不直接依赖 `sqlx`、Redis 客户端、Axum、Tonic 或业务应用 crate。
 
+## 可观测性
+
+`infinity-error` 不引入 `tracing` / `metrics` 依赖，而是提供零依赖原语，供边界处的 crate 记录：
+
+- `InfinityError::class()` → `ErrorClass::{Client, Server}`：低基数归责分类，适合做日志级别决策与 metrics label。
+- `chain()` / `chain_string()` / `root_cause()`：错误因果链与根因，供结构化日志与 trace 使用。
+- `field` 模块：`error.kind` / `error.status` / `error.class` / `error.message` / `error.root_cause` / `error.chain` 字段键常量，保证跨 crate 字段名一致。
+
+```rust
+use infinity_error::{field, InfinityError};
+
+let err = InfinityError::database("connection refused");
+assert_eq!(err.code(), "database");          // error.kind / metrics 主 label
+assert_eq!(err.class().as_str(), "server");  // error.class / 粗粒度 label
+assert_eq!(field::KIND, "error.kind");
+```
+
+字段命名、日志级别、trace/span 与 metrics label 约束详见 [可观测性规范](docs/OBSERVABILITY.md)。
+
 ## 开发命令
 
 ```bash
@@ -104,6 +124,7 @@ cargo clippy -p infinity-error --all-targets -- -D warnings
 ## 文档
 
 - [设计说明](docs/DESIGN.md)
+- [可观测性规范](docs/OBSERVABILITY.md)
 - [测试说明](docs/TESTING.md)
 - [路线图](docs/ROADMAP.md)
 - [常见问题](docs/FAQ.md)

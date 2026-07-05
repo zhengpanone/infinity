@@ -114,3 +114,13 @@ macro_rules! ensure { /* ... */ }
 ## 10. 演进策略
 
 在 `1.0` 之前可以继续新增变体。公共 API 冻结后，应尽量保持既有 `ErrorKind::code()` 稳定，谨慎增加构造函数或元数据。
+
+## 11. 可观测性
+
+`infinity-error` 不依赖 `tracing` / `metrics`，而是提供零依赖的可观测性原语，供边界处的 crate 接入：
+
+- `ErrorClass` / `InfinityError::class()`：`client` / `server` 粗粒度归责分类，低基数，适合做 metrics label 与日志级别决策。
+- `InfinityError::chain()` / `chain_string()` / `root_cause()`：错误因果链与根因，供结构化日志与 trace 使用。
+- `field` 模块：`error.*` 规范化字段键常量，保证跨 crate 字段名一致。
+
+字段命名、日志级别、trace/span 建议字段与 metrics label 约束详见 [可观测性规范](OBSERVABILITY.md)。

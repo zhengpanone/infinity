@@ -131,6 +131,36 @@ impl fmt::Display for ErrorKind {
     }
 }
 
+/// 错误的粗粒度归责分类：由调用方输入导致（`Client`）还是服务端失败（`Server`）。
+///
+/// 仅两个取值，基数极低，适合作为 metrics 的 label，用于把 4xx 与 5xx
+/// 快速拆分。相较之下 [`ErrorKind::code`] 提供更细的分类维度。
+/// 参见可观测性文档（`docs/OBSERVABILITY.md`）。
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum ErrorClass {
+    /// 由调用方或输入导致的错误（通常映射到 4xx）。
+    Client,
+    /// 服务端或基础设施失败（通常映射到 5xx）。
+    Server,
+}
+
+impl ErrorClass {
+    /// 返回稳定的小写字符串，适合日志字段与 metrics label 使用。
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Client => "client",
+            Self::Server => "server",
+        }
+    }
+}
+
+impl fmt::Display for ErrorClass {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
+
 /// Infinity crate 和应用共享的错误类型。
 ///
 /// 标记为 `#[non_exhaustive]`：在 `1.0` 之前可能新增变体,下游 `match`
@@ -428,6 +458,112 @@ impl InfinityError {
     pub const fn is_server_error(&self) -> bool {
         !self.is_client_error()
     }
+
+    /// 返回错误的粗粒度归责分类（[`ErrorClass::Client`] / [`ErrorClass::Server`]）。
+    ///
+    /// 适合作为 metrics 的低基数 label，把客户端错误与服务端错误分开统计。
+    pub const fn class(&self) -> ErrorClass {
+        if self.is_client_error() {
+            ErrorClass::Client
+        } else {
+            ErrorClass::Server
+        }
+    }
+
+    /// 返回从自身开始、沿 `source()` 逐级向下的错误链迭代器。
+    ///
+    /// 第一项是错误自身，随后是各级来源错误。可用于结构化日志记录完整因果链，
+    /// 例如把每一层的 `Display` 收集后写入 `error.chain` 字段。
+    pub fn chain(&self) -> Chain<'_> {
+        Chain { next: Some(self) }
+    }
+
+    /// 返回错误链最深处的根因；若没有来源错误，则返回自身。
+    ///
+    /// 适合作为结构化日志的 `error.root_cause` 字段，快速定位真正的失败原因。
+    pub fn root_cause(&self) -> &(dyn std::error::Error + 'static) {
+        let mut current: &(dyn std::error::Error + 'static) = self;
+        while let Some(source) = current.source() {
+            current = source;
+        }
+        current
+    }
+
+    /// 把整条错误链拼成单行字符串，各层以 `": "` 连接。
+    ///
+    /// 便于填充结构化日志的 `error.chain` 字段：`chain[0]` 是错误自身的
+    /// `Display`，随后是各级来源，末尾是根因。当日志后端不便携带数组时，
+    /// 这是一个紧凑的替代表示。
+    pub fn chain_string(&self) -> String {
+        let mut out = String::new();
+        for (i, err) in self.chain().enumerate() {
+            if i > 0 {
+                out.push_str(": ");
+            }
+            // 直接写入 formatter，避免每层各分配一个临时 String。
+            use fmt::Write as _;
+            let _ = write!(out, "{err}");
+        }
+        out
+    }
+}
+
+/// [`InfinityError::chain`] 返回的错误链迭代器。
+///
+/// 依次产出错误自身及其各级 `source()`，最后以根因结束。
+#[derive(Clone)]
+pub struct Chain<'a> {
+    next: Option<&'a (dyn std::error::Error + 'static)>,
+}
+
+impl<'a> Iterator for Chain<'a> {
+    type Item = &'a (dyn std::error::Error + 'static);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let current = self.next?;
+        self.next = current.source();
+        Some(current)
+    }
+}
+
+impl std::iter::FusedIterator for Chain<'_> {}
+
+/// 结构化错误日志与 trace/span 的规范化字段键。
+///
+/// 全工作区共用同一组字段名，避免各 crate 各写各的键导致日志/指标查询无法聚合。
+/// 字段语义与取值来源见可观测性文档（`docs/OBSERVABILITY.md`）。
+///
+/// # 示例
+///
+/// ```
+/// use infinity_error::{field, InfinityError};
+///
+/// let err = InfinityError::not_found("user");
+/// // 伪代码：实际由下游 crate 在持有 tracing 依赖的边界处记录。
+/// let pairs = [
+///     (field::KIND, err.code().to_owned()),
+///     (field::STATUS, err.status_code().to_string()),
+///     (field::CLASS, err.class().as_str().to_owned()),
+///     (field::MESSAGE, err.to_string()),
+///     (field::ROOT_CAUSE, err.root_cause().to_string()),
+/// ];
+/// assert_eq!(pairs[0], (field::KIND, "not_found".to_owned()));
+/// ```
+pub mod field {
+    /// 稳定错误分类码，来自 [`ErrorKind::code`](crate::ErrorKind::code)。
+    /// 同时作为 metrics 的主分类 label（基数有界，见 `ErrorKind::ALL`）。
+    pub const KIND: &str = "error.kind";
+    /// 默认 HTTP 状态码，来自 [`InfinityError::status_code`](crate::InfinityError::status_code)。
+    pub const STATUS: &str = "error.status";
+    /// 粗粒度归责分类 `client` / `server`，来自 [`ErrorClass`](crate::ErrorClass)。
+    pub const CLASS: &str = "error.class";
+    /// 面向人的顶层错误信息，来自错误的 `Display`。
+    pub const MESSAGE: &str = "error.message";
+    /// 错误链最深处的根因，来自 [`InfinityError::root_cause`](crate::InfinityError::root_cause)。
+    pub const ROOT_CAUSE: &str = "error.root_cause";
+    /// 完整错误链，来自 [`InfinityError::chain`](crate::InfinityError::chain)
+    /// 或 [`chain_string`](crate::InfinityError::chain_string)。
+    pub const CHAIN: &str = "error.chain";
 }
 
 impl From<String> for InfinityError {
@@ -735,5 +871,73 @@ mod tests {
 
         assert_eq!(check(5).unwrap(), 5);
         assert_eq!(check(-1).unwrap_err().kind(), ErrorKind::Validation);
+    }
+
+    #[test]
+    fn chain_yields_error_then_each_source() {
+        let root = io::Error::other("root cause");
+        let err = InfinityError::with_source(ErrorKind::Database, "query failed", root);
+
+        let chain: Vec<String> = err.chain().map(|e| e.to_string()).collect();
+        assert_eq!(
+            chain,
+            vec!["query failed".to_owned(), "root cause".to_owned()]
+        );
+    }
+
+    #[test]
+    fn root_cause_returns_deepest_source() {
+        let root = io::Error::other("root cause");
+        let err = InfinityError::with_source(ErrorKind::Database, "query failed", root);
+
+        assert_eq!(err.root_cause().to_string(), "root cause");
+    }
+
+    #[test]
+    fn chain_of_leaf_error_is_just_itself() {
+        let err = InfinityError::not_found("user");
+
+        assert_eq!(err.chain().count(), 1);
+        assert_eq!(err.root_cause().to_string(), err.to_string());
+    }
+
+    #[test]
+    fn class_splits_client_and_server_errors() {
+        assert_eq!(InfinityError::not_found("user").class(), ErrorClass::Client);
+        assert_eq!(InfinityError::validation("bad").class(), ErrorClass::Client);
+        assert_eq!(InfinityError::database("down").class(), ErrorClass::Server);
+        assert_eq!(InfinityError::internal("boom").class(), ErrorClass::Server);
+    }
+
+    #[test]
+    fn error_class_as_str_is_stable() {
+        assert_eq!(ErrorClass::Client.as_str(), "client");
+        assert_eq!(ErrorClass::Server.as_str(), "server");
+        assert_eq!(ErrorClass::Server.to_string(), "server");
+    }
+
+    #[test]
+    fn chain_string_joins_layers_with_colon() {
+        let root = io::Error::other("root cause");
+        let err = InfinityError::with_source(ErrorKind::Database, "query failed", root);
+
+        assert_eq!(err.chain_string(), "query failed: root cause");
+    }
+
+    #[test]
+    fn chain_string_of_leaf_error_is_just_its_display() {
+        let err = InfinityError::not_found("user");
+
+        assert_eq!(err.chain_string(), err.to_string());
+    }
+
+    #[test]
+    fn field_keys_are_namespaced_and_stable() {
+        assert_eq!(field::KIND, "error.kind");
+        assert_eq!(field::STATUS, "error.status");
+        assert_eq!(field::CLASS, "error.class");
+        assert_eq!(field::MESSAGE, "error.message");
+        assert_eq!(field::ROOT_CAUSE, "error.root_cause");
+        assert_eq!(field::CHAIN, "error.chain");
     }
 }
