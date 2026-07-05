@@ -25,7 +25,7 @@ mod tests {
     fn test_named_thread() {
         let handle = std::thread::Builder::new()
             .name("worker-1".to_string())
-            .spawn(|| name())
+            .spawn(name)
             .expect("spawn thread");
         assert_eq!(handle.join().expect("join"), "worker-1");
     }

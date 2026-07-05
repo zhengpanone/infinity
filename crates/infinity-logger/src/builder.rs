@@ -156,8 +156,10 @@ mod tests {
 
     #[test]
     fn test_builder_config_replace() {
-        let mut custom = LoggerConfig::default();
-        custom.level = LogLevel::Error;
+        let custom = LoggerConfig {
+            level: LogLevel::Error,
+            ..Default::default()
+        };
         let config = LoggerBuilder::new().config(custom).build();
         assert_eq!(config.level.as_str(), "error");
     }
