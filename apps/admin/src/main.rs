@@ -3,10 +3,11 @@
 //! 演示如何把 `infinity-config`、`infinity-logger`、`infinity-common`
 //! 和 `infinity-utils` 组合到同一个启动流程里。
 
-use std::{error::Error, path::PathBuf};
+use std::path::PathBuf;
 
 use infinity_common::ids::{TenantId, UserId};
 use infinity_config::{Config, config::AppConfig};
+use infinity_error::{InfinityError, Result};
 use infinity_logger::{Logger, config::LogLevel};
 
 /// 当前 crate 版本。
@@ -34,7 +35,7 @@ impl Admin {
     }
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<()> {
     // 1. 先加载配置，再根据配置初始化日志。
     let config = load_config()?;
     init_logger(&config)?;
@@ -71,13 +72,13 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn load_config() -> Result<&'static AppConfig, Box<dyn Error>> {
+fn load_config() -> Result<&'static AppConfig> {
     let config_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../configs");
     let config = Config::from_dir(config_dir)?;
     Ok(config)
 }
 
-fn init_logger(config: &AppConfig) -> Result<(), Box<dyn Error>> {
+fn init_logger(config: &AppConfig) -> Result<()> {
     let logger_config = config.logger.clone().unwrap_or_default();
     let level = parse_log_level(&logger_config.level)?;
 
@@ -89,7 +90,7 @@ fn init_logger(config: &AppConfig) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn parse_log_level(level: &str) -> Result<LogLevel, Box<dyn Error>> {
+fn parse_log_level(level: &str) -> Result<LogLevel> {
     let parsed = match level.trim().to_ascii_lowercase().as_str() {
         "trace" => LogLevel::Trace,
         "debug" => LogLevel::Debug,
@@ -97,7 +98,9 @@ fn parse_log_level(level: &str) -> Result<LogLevel, Box<dyn Error>> {
         "warn" => LogLevel::Warn,
         "error" => LogLevel::Error,
         other => {
-            return Err(format!("unsupported log level: {other}").into());
+            return Err(InfinityError::config(format!(
+                "unsupported log level: {other}"
+            )));
         }
     };
 
@@ -107,7 +110,7 @@ fn parse_log_level(level: &str) -> Result<LogLevel, Box<dyn Error>> {
 /// 执行启动流程中的初始化步骤。
 ///
 /// 这里仅作演示；真实实现可根据配置加载数据库、注册路由等。
-fn bootstrap(_config: &AppConfig, admin: &Admin) -> Result<(), Box<dyn Error>> {
+fn bootstrap(_config: &AppConfig, admin: &Admin) -> Result<()> {
     tracing::debug!(
         username = admin.username.as_str(),
         "running bootstrap tasks"

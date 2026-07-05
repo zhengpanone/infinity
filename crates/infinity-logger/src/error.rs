@@ -51,6 +51,23 @@ impl LoggerError {
     }
 }
 
+/// 在工作区边界把 [`LoggerError`] 转换为统一的 [`InfinityError`]。
+///
+/// 日志相关失败归入 [`ErrorKind::Logger`]；`Unsupported` 与 `Message`
+/// 保留各自语义。原始 `LoggerError` 会作为 source 保留，形成完整错误链。
+impl From<LoggerError> for infinity_error::InfinityError {
+    fn from(err: LoggerError) -> Self {
+        use infinity_error::ErrorKind;
+
+        let kind = match &err {
+            LoggerError::Unsupported(_) => ErrorKind::Unsupported,
+            LoggerError::Message(_) => ErrorKind::Message,
+            _ => ErrorKind::Logger,
+        };
+        infinity_error::InfinityError::with_source(kind, err.to_string(), err)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -78,5 +95,27 @@ mod tests {
         let io_err = io::Error::new(io::ErrorKind::NotFound, "missing");
         let err: LoggerError = io_err.into();
         assert!(matches!(err, LoggerError::Io(_)));
+    }
+
+    #[test]
+    fn logger_error_maps_to_logger_kind_and_preserves_source() {
+        use infinity_error::{ErrorKind, InfinityError};
+        use std::error::Error;
+
+        let err: InfinityError = LoggerError::AlreadyInitialized.into();
+        assert_eq!(err.kind(), ErrorKind::Logger);
+        assert_eq!(err.status_code(), 500);
+        assert!(err.source().is_some());
+    }
+
+    #[test]
+    fn logger_unsupported_and_message_keep_their_kind() {
+        use infinity_error::{ErrorKind, InfinityError};
+
+        let unsupported: InfinityError = LoggerError::Unsupported("otel".into()).into();
+        assert_eq!(unsupported.kind(), ErrorKind::Unsupported);
+
+        let message: InfinityError = LoggerError::message("boom").into();
+        assert_eq!(message.kind(), ErrorKind::Message);
     }
 }

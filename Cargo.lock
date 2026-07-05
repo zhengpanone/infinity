@@ -447,6 +447,7 @@ version = "0.1.1"
 dependencies = [
  "infinity-common",
  "infinity-config",
+ "infinity-error",
  "infinity-logger",
  "infinity-utils",
  "tracing",
@@ -480,6 +481,7 @@ dependencies = [
 name = "infinity-config"
 version = "0.1.0"
 dependencies = [
+ "infinity-error",
  "once_cell",
  "serde",
  "serde_json",
@@ -516,6 +518,7 @@ name = "infinity-logger"
 version = "0.1.0"
 dependencies = [
  "hostname",
+ "infinity-error",
  "once_cell",
  "opentelemetry",
  "opentelemetry_sdk",

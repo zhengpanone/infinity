@@ -18,10 +18,16 @@
 
 ## Milestone 2：工作区接入
 
-- [ ] 在 `infinity-database` 中使用 `infinity_error::Result`
-- [ ] 在 `infinity-cache` 中使用 `infinity_error::Result`
-- [ ] 在 `infinity-web` 中使用 `infinity_error::Result`
-- [ ] 在合适的位置替换应用启动代码中的 `Box<dyn Error>`
+- [x] 为 `infinity-config` 添加 `From<ConfigError> for InfinityError` 边界转换
+- [x] 为 `infinity-logger` 添加 `From<LoggerError> for InfinityError` 边界转换
+- [x] 在 `apps/admin` 启动代码中用 `infinity_error::Result` 替换 `Box<dyn Error>`
+- [ ] `infinity-database` 具备实际功能后接入 `infinity_error`（当前为占位桩）
+- [ ] `infinity-cache` 具备实际功能后接入 `infinity_error`（当前为占位桩）
+- [ ] `infinity-web` 具备实际功能后接入 `infinity_error`（当前为占位桩）
+
+> 说明：`infinity-config` 与 `infinity-logger` 保留各自的富错误类型（`ConfigError` /
+> `LoggerError`），仅在工作区边界通过 `From` 转换为 `InfinityError`，符合设计文档
+> 「crate 可保留本地错误类型，在边界处转换」的原则。
 
 ## Milestone 3：Web 集成
 

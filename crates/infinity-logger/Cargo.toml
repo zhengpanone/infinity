@@ -36,6 +36,9 @@ grpc = ["dep:tonic"]
 # 全部功能
 full = ["console", "file", "json", "otel", "axum", "grpc"]
 [dependencies]
+# workspace 统一错误
+infinity-error = { path = "../infinity-error" }
+
 # tracing
 tracing = "0.1"
 tracing-core = "0.1"
