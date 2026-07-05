@@ -1,6 +1,8 @@
 [workspace]
 resolver = "3"
 members = ["apps/*", "crates/*"]
+# infinity-proto 仍为空壳脚手架，暂不纳入构建，避免污染 Cargo.lock；正式开工时移除此行。
+exclude = ["crates/infinity-proto"]
 
 [workspace.package]
 version = "0.1.0"
