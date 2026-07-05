@@ -27,7 +27,8 @@ Infinity 平台的**管理后台服务**。当前为骨架示例，演示如何�
 - **包名**：`infinity-admin-server`（workspace 内唯一）
 - **二进制名**：`admin`（部署 / CLI 中使用的简短名）
 
-当前实现是一个**启动骨架**，完成日志初始化、领域类型创建与启动耗时统计，展示三个基础库的组合方式。真实业务能力将在后续里程碑中填充。
+当前实现在启动骨架之上提供一个**最小可用的 HTTP 服务**：加载配置、初始化日志、创建领域类型，
+随后基于 `axum` 监听配置端口，对外暴露健康检查与示例接口，并支持优雅关闭。真实业务能力将在后续里程碑中填充。
 
 ---
 
@@ -37,7 +38,8 @@ Infinity 平台的**管理后台服务**。当前为骨架示例，演示如何�
 |----|------|----------------|
 | [`infinity-config`](../../crates/infinity-config) | 分层配置加载与校验 | 从 `configs/` 加载 `AppConfig` |
 | [`infinity-error`](../../crates/infinity-error) | 工作区统一错误 | `Result` 传播、致命错误结构化上报 |
-| [`infinity-logger`](../../crates/infinity-logger) | 统一日志基础设施 | 初始化日志、输出结构化日志 |
+| [`infinity-logger`](../../crates/infinity-logger) | 统一日志基础设施 | 初始化日志、请求追踪 Layer |
+| [`infinity-web`](../../crates/infinity-web) | Web/HTTP 构建块 | `ApiError` 统一错误响应 |
 | [`infinity-common`](../../crates/infinity-common) | 共享领域类型 | `UserId` / `TenantId` |
 | [`infinity-utils`](../../crates/infinity-utils) | 无业务含义的纯工具 | 时间戳、启动耗时统计 |
 
@@ -89,7 +91,8 @@ apps/admin
 ├── Cargo.toml        # 包定义、[[bin]] 短名、依赖
 ├── README.md         # 本文档
 └── src
-    └── main.rs       # 入口：日志初始化 + 启动流程
+    ├── main.rs       # 入口：配置/日志初始化 + 启动流程 + 致命错误上报
+    └── http.rs       # axum 路由、健康检查、优雅关闭
 ```
 
 ### `main.rs` 核心流程
@@ -147,16 +150,49 @@ stderr 兜底输出，保证致命错误始终可见。
 
 ---
 
+## HTTP 接口
+
+启动后监听 `configs/` 中 `server.host:server.port`（默认 `0.0.0.0:8080`），
+路由挂载了 `infinity-logger` 的请求追踪 Layer（自动记录 method / uri / status / 耗时）。
+
+| 方法 | 路径 | 说明 | 响应 |
+|------|------|------|------|
+| GET | `/` | 服务标识 | `infinity-admin-server` |
+| GET | `/health` | 健康检查（探针） | `{"status":"ok","version":"0.1.1"}` |
+| GET | `/admins/{id}` | 按 ID 查询管理员（占位） | 见下 |
+
+`/admins/{id}` 演示 `infinity-web` 的错误→响应映射：
+
+```bash
+# 非法 ID → 400 validation
+$ curl -s http://127.0.0.1:8080/admins//
+{"status":400,"code":"validation","message":"validation error in id: must be a non-empty identifier"}
+
+# 合法但暂无存储 → 404 not_found
+$ curl -s http://127.0.0.1:8080/admins/42
+{"status":404,"code":"not_found","message":"not found: admin:42"}
+```
+
+错误响应体由 `infinity_web::ApiError` 统一序列化（`status` / `code` / `message`，
+携带时附 `request_id`）；服务端错误（5xx）的 `message` 会被替换为通用文案，避免泄露内部细节。
+
+### 优雅关闭
+
+进程收到 `Ctrl-C`（或 Unix 上的 `SIGTERM`）时停止接收新连接，等待进行中的请求完成后退出。
+
+---
+
 ## 日志输出
 
 运行后输出示例（控制台，Debug 级别）：
 
 ```text
-INFO  admin: admin server starting version="0.1.1" app="infinity"
+INFO  admin: admin server starting version="0.1.1" app="Infinity"
 INFO  admin: admin server config loaded host="0.0.0.0" port=8080
 INFO  admin: default admin account created admin_id="019f2696-…" tenant_id="019f2696-…" username="root"
 DEBUG admin: running bootstrap tasks username="root"
-INFO  admin: admin server ready elapsed_ms=0
+INFO  admin: admin bootstrap complete elapsed_ms=0
+INFO  admin::http: admin HTTP server listening addr=0.0.0.0:8080
 ```
 
 - ID 由 `infinity-utils` 的 UUID v7 生成，天然按时间有序
@@ -186,13 +222,12 @@ cargo run -p infinity-admin-server
 
 ## 路线图
 
-当前为骨架示例，后续计划：
-
 - [x] 接入 `infinity-config` 加载配置
+- [x] 接入 `infinity-web` 提供 HTTP 接口
+- [x] 优雅关闭与健康检查
 - [ ] 接入 `infinity-database` 连接数据库
-- [ ] 接入 `infinity-web` 提供 HTTP 接口
 - [ ] 管理员认证与权限（`infinity-auth`）
-- [ ] 优雅关闭与健康检查
+- [ ] 请求级 Request ID 注入与错误响应关联
 
 ---
 

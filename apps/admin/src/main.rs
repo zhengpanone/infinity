@@ -12,6 +12,8 @@ use infinity_config::{Config, config::AppConfig};
 use infinity_error::{InfinityError, Result, field};
 use infinity_logger::{Logger, config::LogLevel};
 
+mod http;
+
 /// 当前 crate 版本。
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -50,7 +52,8 @@ fn main() -> ExitCode {
 
 /// 启动流程主体。任何步骤失败都会以 [`InfinityError`] 向上传播，交由
 /// [`report_fatal`] 统一记录。
-fn run() -> Result<()> {
+#[tokio::main]
+async fn run() -> Result<()> {
     // 1. 先加载配置，再根据配置初始化日志。
     let config = load_config()?;
     init_logger(config)?;
@@ -83,7 +86,10 @@ fn run() -> Result<()> {
     bootstrap(config, &admin)?;
     let elapsed = infinity_utils::time::now_millis() - started;
 
-    tracing::info!(elapsed_ms = elapsed, "admin server ready");
+    tracing::info!(elapsed_ms = elapsed, "admin bootstrap complete");
+
+    // 4. 启动 HTTP 服务，阻塞直到收到关闭信号后优雅退出。
+    http::serve(config).await?;
     Ok(())
 }
 

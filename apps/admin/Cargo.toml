@@ -17,7 +17,14 @@ path = "src/main.rs"
 [dependencies]
 infinity-error = { path = "../../crates/infinity-error" }
 infinity-config = { path = "../../crates/infinity-config" }
-infinity-logger = { path = "../../crates/infinity-logger" }
+infinity-logger = { path = "../../crates/infinity-logger", features = [
+    "axum",
+    "json",
+] }
 infinity-common = { path = "../../crates/infinity-common" }
 infinity-utils = { path = "../../crates/infinity-utils" }
+infinity-web = { path = "../../crates/infinity-web" }
 tracing.workspace = true
+tokio.workspace = true
+axum.workspace = true
+serde.workspace = true
