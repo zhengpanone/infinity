@@ -1,14 +1,27 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+//! Infinity Web/HTTP 构建块。
+//!
+//! 该 crate 负责把工作区统一错误 [`infinity_error::InfinityError`] 映射为面向
+//! API 客户端的 HTTP 响应。核心类型 [`ApiError`] 与 [`WebResult`] 不依赖具体
+//! Web 框架；在启用默认的 `axum` feature 时，[`ApiError`] 额外实现 axum 的
+//! `IntoResponse`，可直接从 handler 返回。
+//!
+//! ```
+//! use infinity_error::InfinityError;
+//! use infinity_web::{ApiError, WebResult};
+//!
+//! fn find_user(id: &str) -> WebResult<String> {
+//!     if id.is_empty() {
+//!         // InfinityError 通过 `?` 自动转换为 ApiError
+//!         return Err(InfinityError::validation("id 不能为空").into());
+//!     }
+//!     Ok(format!("user:{id}"))
+//! }
+//!
+//! let err = find_user("").unwrap_err();
+//! assert_eq!(err.status, 400);
+//! assert_eq!(err.code, "validation");
+//! ```
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+mod error;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub use error::{ApiError, REQUEST_ID_HEADER, WebResult};

@@ -31,9 +31,9 @@
 
 ## Milestone 3：Web 集成
 
-- [ ] 在 `infinity-web` 中添加响应映射
-- [ ] 定义 API 错误响应结构
-- [ ] 添加带 request-id 的错误日志建议
+- [x] 在 `infinity-web` 中添加响应映射（`ApiError` + `IntoResponse`）
+- [x] 定义 API 错误响应结构（`status` / `code` / `message` / `request_id`）
+- [x] 添加带 request-id 的错误日志建议（见 infinity-web README）
 
 ## Milestone 4：可观测性
 
