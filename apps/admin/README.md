@@ -91,8 +91,14 @@ apps/admin
 ├── Cargo.toml        # 包定义、[[bin]] 短名、依赖
 ├── README.md         # 本文档
 └── src
-    ├── main.rs       # 入口：配置/日志初始化 + 启动流程 + 致命错误上报
-    └── http.rs       # axum 路由、健康检查、优雅关闭
+    ├── main.rs       # 入口：run() 编排（装配 → 领域 → 服务）+ 致命错误兜底
+    ├── startup.rs    # 启动装配：配置加载、日志初始化、启动任务
+    ├── telemetry.rs  # 致命错误结构化上报（report_fatal）
+    ├── domain.rs     # 领域模型（Admin）
+    └── server/
+        ├── mod.rs    # serve_all（并发 HTTP+gRPC）+ 共享优雅关闭信号
+        ├── http.rs   # axum 路由、健康检查、错误响应映射
+        └── grpc.rs   # tonic Greeter、健康检查、反射
 ```
 
 ### `main.rs` 核心流程

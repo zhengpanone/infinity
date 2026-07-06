@@ -1,8 +1,9 @@
 //! Admin HTTP 服务。
 //!
 //! 基于 `axum` 提供最小可用的管理端 HTTP 服务：健康检查端点、基于
-//! `infinity-logger` 的请求追踪、优雅关闭，并复用 `infinity-web` 的
-//! [`ApiError`](infinity_web::ApiError) 统一错误响应。
+//! `infinity-logger` 的请求追踪，并复用 `infinity-web` 的
+//! [`ApiError`](infinity_web::ApiError) 统一错误响应。优雅关闭信号来自
+//! [`super::shutdown_signal`]。
 
 use axum::{Json, Router, extract::Path, routing::get};
 use serde::Serialize;
@@ -25,7 +26,7 @@ struct Health {
 /// 构建 admin HTTP 路由。
 ///
 /// 拆分为独立函数便于在测试中直接构造并驱动路由。
-pub fn router() -> Router {
+pub(crate) fn router() -> Router {
     Router::new()
         .route("/", get(root))
         .route("/health", get(health))
@@ -61,7 +62,7 @@ async fn get_admin(Path(id): Path<String>) -> WebResult<Json<Health>> {
 }
 
 /// 绑定配置中的 `host:port` 并启动 HTTP 服务，直到收到关闭信号后优雅退出。
-pub async fn serve(config: &AppConfig) -> Result<()> {
+pub(crate) async fn serve(config: &AppConfig) -> Result<()> {
     let addr = format!("{}:{}", config.server.host, config.server.port);
     let listener = tokio::net::TcpListener::bind(&addr)
         .await
@@ -70,45 +71,12 @@ pub async fn serve(config: &AppConfig) -> Result<()> {
     tracing::info!(addr = %addr, "admin HTTP server listening");
 
     axum::serve(listener, router())
-        .with_graceful_shutdown(shutdown_signal())
+        .with_graceful_shutdown(super::shutdown_signal())
         .await
         .context(ErrorKind::Web, "admin HTTP server error")?;
 
     tracing::info!("admin HTTP server stopped");
     Ok(())
-}
-
-/// 等待进程终止信号（Ctrl-C，或 Unix 上的 `SIGTERM`），触发优雅关闭。
-///
-/// 信号处理器安装失败时记录错误但不 panic，避免因可观测性问题拖垮进程。
-/// 供 HTTP 与 gRPC 两个服务共用同一套关闭信号逻辑。
-pub(crate) async fn shutdown_signal() {
-    let ctrl_c = async {
-        if let Err(err) = tokio::signal::ctrl_c().await {
-            tracing::error!(error = %err, "failed to install Ctrl-C handler");
-        }
-    };
-
-    #[cfg(unix)]
-    let terminate = async {
-        use tokio::signal::unix::{SignalKind, signal};
-        match signal(SignalKind::terminate()) {
-            Ok(mut stream) => {
-                stream.recv().await;
-            }
-            Err(err) => tracing::error!(error = %err, "failed to install SIGTERM handler"),
-        }
-    };
-
-    #[cfg(not(unix))]
-    let terminate = std::future::pending::<()>();
-
-    tokio::select! {
-        _ = ctrl_c => {}
-        _ = terminate => {}
-    }
-
-    tracing::info!("shutdown signal received, starting graceful shutdown");
 }
 
 #[cfg(test)]
