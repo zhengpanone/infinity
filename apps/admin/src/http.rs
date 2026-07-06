@@ -81,7 +81,8 @@ pub async fn serve(config: &AppConfig) -> Result<()> {
 /// 等待进程终止信号（Ctrl-C，或 Unix 上的 `SIGTERM`），触发优雅关闭。
 ///
 /// 信号处理器安装失败时记录错误但不 panic，避免因可观测性问题拖垮进程。
-async fn shutdown_signal() {
+/// 供 HTTP 与 gRPC 两个服务共用同一套关闭信号逻辑。
+pub(crate) async fn shutdown_signal() {
     let ctrl_c = async {
         if let Err(err) = tokio::signal::ctrl_c().await {
             tracing::error!(error = %err, "failed to install Ctrl-C handler");

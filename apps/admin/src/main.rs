@@ -12,6 +12,7 @@ use infinity_config::{Config, config::AppConfig};
 use infinity_error::{InfinityError, Result, field};
 use infinity_logger::{Logger, config::LogLevel};
 
+mod grpc;
 mod http;
 
 /// 当前 crate 版本。
@@ -88,8 +89,10 @@ async fn run() -> Result<()> {
 
     tracing::info!(elapsed_ms = elapsed, "admin bootstrap complete");
 
-    // 4. 启动 HTTP 服务，阻塞直到收到关闭信号后优雅退出。
-    http::serve(config).await?;
+    // 4. 并发启动 HTTP 与 gRPC 服务，任一出错即整体退出；
+    //    收到关闭信号（Ctrl-C / SIGTERM）时两者一起优雅退出。
+    tracing::info!("starting HTTP and gRPC servers");
+    tokio::try_join!(http::serve(config), grpc::serve(config))?;
     Ok(())
 }
 

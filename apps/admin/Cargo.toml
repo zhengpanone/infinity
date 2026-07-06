@@ -24,7 +24,12 @@ infinity-logger = { path = "../../crates/infinity-logger", features = [
 infinity-common = { path = "../../crates/infinity-common" }
 infinity-utils = { path = "../../crates/infinity-utils" }
 infinity-web = { path = "../../crates/infinity-web" }
+infinity-proto = { path = "../../crates/infinity-proto" }
 tracing.workspace = true
 tokio.workspace = true
 axum.workspace = true
 serde.workspace = true
+# grpc
+tonic.workspace = true
+tonic-health.workspace = true
+tonic-reflection.workspace = true
