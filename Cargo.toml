@@ -2,7 +2,7 @@
 resolver = "3"
 members = ["apps/*", "crates/*"]
 # infinity-proto 仍为空壳脚手架，暂不纳入构建，避免污染 Cargo.lock；正式开工时移除此行。
-exclude = ["crates/infinity-proto"]
+# exclude = ["crates/infinity-proto"]
 
 [workspace.package]
 version = "0.1.0"
@@ -37,3 +37,10 @@ anyhow = "1"
 # 异步运行时与 Web 框架（供各应用服务复用，统一版本）
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal"] }
 axum = "0.8"
+
+# grpc
+tonic = "0.14.2"
+tonic-prost = "0.14.3"
+prost-types = "0.14.1"
+tonic-health = "0.14.2"
+tonic-reflection = "0.14.2"

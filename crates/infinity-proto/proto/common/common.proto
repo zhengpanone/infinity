@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package com.zp.infinity.common;
+
+// 枚举类型
+enum Status{
+  UNKNOWN = 0;
+  SUCCESS = 1;
+  FAILED = 2;
+  PENDING = 3;
+}
+
+message CommonId{
+  string id = 1;
+}

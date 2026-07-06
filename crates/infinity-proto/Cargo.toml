@@ -1,0 +1,21 @@
+[package]
+name = "infinity-proto"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[lib]
+name = "infinity_proto" # 明确指定库名
+path = "src/lib.rs"     # 明确指定库路径
+[dependencies]
+prost = "0.14"
+tonic = "0.14"
+tonic-prost.workspace = true
+prost-types.workspace = true
+
+[build-dependencies]
+protoc-bin-vendored = "3"
+tonic-prost-build = "0.14"

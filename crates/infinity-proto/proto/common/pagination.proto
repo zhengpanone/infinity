@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package microservice.common;
+
+enum SortOrder {
+  SORT_ORDER_UNSPECIFIED = 0;
+  SORT_ORDER_ASC = 1;
+  SORT_ORDER_DESC = 2;
+}
+
+// 分页请求
+message PageRequest{
+  uint64 page = 1;
+  uint64 page_size = 2;
+  string sort_by = 3;
+  SortOrder sort_order = 4;
+}
+
+// 分页响应
+message PageResponse {
+  uint64 page = 1;
+  uint64 page_size = 2;
+  uint64 total = 3;
+  uint64 total_pages = 4;
+  bool has_next = 5;
+  bool has_previous = 6;
+}
