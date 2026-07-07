@@ -22,6 +22,8 @@
 //! assert_eq!(err.code, "validation");
 //! ```
 
+mod api_response;
 mod error;
+mod pagination;
 
 pub use error::{ApiError, REQUEST_ID_HEADER, WebResult};

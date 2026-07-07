@@ -1,5 +1,5 @@
 [package]
-name = "infinity-admin-server"
+name = "admin"
 description = "Infinity admin management server"
 readme = "README.md"
 version = "0.1.1"
@@ -11,7 +11,7 @@ license.workspace = true
 rust-version.workspace = true
 
 [[bin]]
-name = "admin"
+name = "infinity-admin-server"
 path = "src/main.rs"
 
 [dependencies]
@@ -29,6 +29,7 @@ tracing.workspace = true
 tokio.workspace = true
 axum.workspace = true
 serde.workspace = true
+utoipa.workspace = true
 # grpc
 tonic.workspace = true
 tonic-health.workspace = true

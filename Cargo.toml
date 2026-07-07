@@ -14,6 +14,7 @@ license = "MIT"
 
 [workspace.dependencies]
 serde = { version = "1.0.228", features = ["derive"] }
+serde_with = "3.16.1"
 serde_json = "1.0.150"
 serde_yaml = "0.9.34"
 toml = "1.1.2"
@@ -38,9 +39,13 @@ anyhow = "1"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal"] }
 axum = "0.8"
 
+utoipa = { version = "5.4.0", features = ["axum_extras", "chrono", "uuid"] }
+
 # grpc
 tonic = "0.14.2"
 tonic-prost = "0.14.3"
 prost-types = "0.14.1"
 tonic-health = "0.14.2"
 tonic-reflection = "0.14.2"
+
+validator = { version = "0.20.0" }

@@ -8,18 +8,15 @@ repository.workspace = true
 license.workspace = true
 rust-version.workspace = true
 
-[features]
-default = ["axum"]
-
-# Axum 响应集成（IntoResponse 等）
-axum = ["dep:axum"]
-
 [dependencies]
 infinity-error = { path = "../infinity-error" }
 serde.workspace = true
+serde_with.workspace = true
 
-# axum 响应集成（可选）
-axum = { version = "0.8", optional = true }
+axum.workspace = true
 
-[dev-dependencies]
+utoipa.workspace = true
 serde_json.workspace = true
+
+validator.workspace = true
+chrono.workspace = true

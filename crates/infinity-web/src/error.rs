@@ -4,8 +4,11 @@
 //! 直接取自统一错误分类，客户端错误（4xx）保留原始消息，服务端错误（5xx）出于
 //! 安全考虑替换为通用消息，避免向外泄露内部实现细节。
 
+use chrono::{DateTime, Utc};
 use infinity_error::InfinityError;
 use serde::Serialize;
+use serde_with::skip_serializing_none;
+use utoipa::ToSchema;
 
 /// 标准 Request ID 请求/响应头名称。
 ///
@@ -37,6 +40,34 @@ pub struct ApiError {
     pub code: &'static str,
     /// 面向客户端的错误消息。
     pub message: String,
+
+    /// 错误详情
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub details: Option<String>,
+
+    /// 时间戳
+    pub timestamp: DateTime<Utc>,
+
+    /// 验证错误详情
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub validation_errors: Option<Vec<ValidationErrorDetail>>,
+
+    /// 错误堆栈（仅开发环境）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stack_trace: Option<String>,
+
+    /// 错误解决方案建议
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub suggestion: Option<String>,
+
+    /// 错误文档链接
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub documentation_url: Option<String>,
+
+    /// 原始错误（仅开发环境）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub original_error: Option<String>,
+
     /// 关联的 Request ID，便于日志排查；为空时序列化中省略。
     #[serde(skip_serializing_if = "Option::is_none")]
     pub request_id: Option<String>,
@@ -58,6 +89,13 @@ impl ApiError {
             code: error.code(),
             message,
             request_id: None,
+            details: Some(error.to_string()),
+            timestamp: Utc::now(),
+            validation_errors: None,
+            stack_trace: None,
+            suggestion: None,
+            documentation_url: None,
+            original_error: None,
         }
     }
 
@@ -78,6 +116,21 @@ impl From<&InfinityError> for ApiError {
     fn from(error: &InfinityError) -> Self {
         Self::from_error(error)
     }
+}
+
+/// 验证错误详情
+#[skip_serializing_none]
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct ValidationErrorDetail {
+    /// 字段名
+    pub field: String,
+    /// 错误消息
+    pub message: String,
+    /// 错误码
+    pub code: String,
+    /// 错误参数
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub params: Option<Vec<(String, String)>>,
 }
 
 #[cfg(feature = "axum")]
