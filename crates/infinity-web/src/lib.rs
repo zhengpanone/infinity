@@ -22,6 +22,12 @@
 //! assert_eq!(err.code, "validation");
 //! ```
 
+mod api_response;
 mod error;
+mod pagination;
 
-pub use error::{ApiError, REQUEST_ID_HEADER, WebResult};
+pub use api_response::ApiResponse;
+pub use error::{ApiError, REQUEST_ID_HEADER, ValidationErrorDetail, WebResult};
+pub use pagination::{
+    PaginatedData, Pagination, PaginationInfo, PaginationLinks, PaginationParams, SortOrder,
+};
