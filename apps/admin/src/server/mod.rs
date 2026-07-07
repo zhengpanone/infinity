@@ -6,14 +6,19 @@
 pub(crate) mod grpc;
 pub(crate) mod http;
 
+use std::sync::Arc;
+
 use infinity_config::config::AppConfig;
+use infinity_database::Database;
 use infinity_error::Result;
 
 /// 并发启动 HTTP 与 gRPC 服务，任一出错即整体退出；
 /// 收到关闭信号（Ctrl-C / SIGTERM）时两者一起优雅退出。
-pub(crate) async fn serve_all(config: &AppConfig) -> Result<()> {
+///
+/// 数据库句柄目前只有 HTTP 服务用到（探活与查询），gRPC 暂不需要。
+pub(crate) async fn serve_all(config: &AppConfig, db: Arc<Database>) -> Result<()> {
     tracing::info!("starting HTTP and gRPC servers");
-    tokio::try_join!(http::serve(config), grpc::serve(config))?;
+    tokio::try_join!(http::serve(config, db), grpc::serve(config))?;
     Ok(())
 }
 

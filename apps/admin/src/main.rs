@@ -10,6 +10,7 @@
 //! - [`telemetry`]：致命错误上报
 
 use std::process::ExitCode;
+use std::sync::Arc;
 
 use infinity_common::ids::TenantId;
 use infinity_error::Result;
@@ -72,7 +73,10 @@ async fn run() -> Result<()> {
     let elapsed = infinity_utils::time::now_millis() - started;
     tracing::info!(elapsed_ms = elapsed, "admin bootstrap complete");
 
-    // 4. 并发启动 HTTP 与 gRPC 服务，收到关闭信号后一起优雅退出。
-    server::serve_all(config).await?;
+    // 4. 连接数据库并运行迁移。
+    let db = Arc::new(startup::init_database(config).await?);
+
+    // 5. 并发启动 HTTP 与 gRPC 服务，收到关闭信号后一起优雅退出。
+    server::serve_all(config, db).await?;
     Ok(())
 }

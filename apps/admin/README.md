@@ -40,6 +40,8 @@ Infinity 平台的**管理后台服务**。当前为骨架示例，演示如何�
 | [`infinity-error`](../../crates/infinity-error) | 工作区统一错误 | `Result` 传播、致命错误结构化上报 |
 | [`infinity-logger`](../../crates/infinity-logger) | 统一日志基础设施 | 初始化日志、请求追踪 Layer |
 | [`infinity-web`](../../crates/infinity-web) | Web/HTTP 构建块 | `ApiError` 统一错误响应 |
+| [`infinity-database`](../../crates/infinity-database) | 数据库访问层 | 连接池、迁移、`/health` 探活、`AdminRepository` 查询 |
+| [`infinity-proto`](../../crates/infinity-proto) | gRPC 契约 | Greeter 服务、reflection 描述符 |
 | [`infinity-common`](../../crates/infinity-common) | 共享领域类型 | `UserId` / `TenantId` |
 | [`infinity-utils`](../../crates/infinity-utils) | 无业务含义的纯工具 | 时间戳、启动耗时统计 |
 
@@ -161,22 +163,32 @@ stderr 兜底输出，保证致命错误始终可见。
 启动后监听 `configs/` 中 `server.host:server.port`（默认 `0.0.0.0:8080`），
 路由挂载了 `infinity-logger` 的请求追踪 Layer（自动记录 method / uri / status / 耗时）。
 
+> 前置：需要可用的 PostgreSQL。地址取自 `configs/` 的 `[database]`（默认
+> `postgres://postgres:postgres@localhost/infinity`），启动时自动运行迁移。
+
 | 方法 | 路径 | 说明 | 响应 |
 |------|------|------|------|
 | GET | `/` | 服务标识 | `infinity-admin-server` |
-| GET | `/health` | 健康检查（探针） | `{"status":"ok","version":"0.1.1"}` |
-| GET | `/admins/{id}` | 按 ID 查询管理员（占位） | 见下 |
+| GET | `/health` | 健康检查（含数据库探活） | 通：`{"status":"ok","version":"0.1.1"}`；DB 不可达：`503` |
+| GET | `/admins/{id}` | 按 ID 查询管理员 | 见下 |
 
-`/admins/{id}` 演示 `infinity-web` 的错误→响应映射：
+`/health` 会对数据库执行一次 `SELECT 1` 探活，数据库不可达时返回 `503 { "code": "database" }`，
+保持探针语义（区别于业务 5xx）。
+
+`/admins/{id}` 走真实数据库查询，并演示 `infinity-web` 的错误→响应映射：
 
 ```bash
 # 非法 ID → 400 validation
 $ curl -s http://127.0.0.1:8080/admins//
 {"status":400,"code":"validation","message":"validation error in id: must be a non-empty identifier"}
 
-# 合法但暂无存储 → 404 not_found
-$ curl -s http://127.0.0.1:8080/admins/42
-{"status":404,"code":"not_found","message":"not found: admin:42"}
+# 命中 → 200
+$ curl -s http://127.0.0.1:8080/admins/<已存在的id>
+{"id":"...","tenant_id":"...","username":"..."}
+
+# 查无此人 → 404 not_found
+$ curl -s http://127.0.0.1:8080/admins/does-not-exist
+{"status":404,"code":"not_found","message":"not found: admin:does-not-exist"}
 ```
 
 错误响应体由 `infinity_web::ApiError` 统一序列化（`status` / `code` / `message`，
@@ -231,7 +243,7 @@ cargo run -p infinity-admin-server
 - [x] 接入 `infinity-config` 加载配置
 - [x] 接入 `infinity-web` 提供 HTTP 接口
 - [x] 优雅关闭与健康检查
-- [ ] 接入 `infinity-database` 连接数据库
+- [x] 接入 `infinity-database` 连接数据库（连接池 + 迁移 + 示例仓储）
 - [ ] 管理员认证与权限（`infinity-auth`）
 - [ ] 请求级 Request ID 注入与错误响应关联
 

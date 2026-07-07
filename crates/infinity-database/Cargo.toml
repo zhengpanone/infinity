@@ -9,3 +9,11 @@ license.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+infinity-config = { path = "../infinity-config" }
+infinity-error = { path = "../infinity-error" }
+# 追加 migrate 特性以使用 sqlx::migrate! 宏（workspace 基础特性未含）
+sqlx = { workspace = true, features = ["migrate"] }
+tracing.workspace = true
+
+[dev-dependencies]
+tokio.workspace = true

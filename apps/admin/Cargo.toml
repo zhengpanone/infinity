@@ -25,6 +25,7 @@ infinity-common = { path = "../../crates/infinity-common" }
 infinity-utils = { path = "../../crates/infinity-utils" }
 infinity-web = { path = "../../crates/infinity-web" }
 infinity-proto = { path = "../../crates/infinity-proto" }
+infinity-database = { path = "../../crates/infinity-database" }
 tracing.workspace = true
 tokio.workspace = true
 axum.workspace = true

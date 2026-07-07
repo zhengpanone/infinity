@@ -7,6 +7,7 @@
 use std::path::PathBuf;
 
 use infinity_config::{Config, config::AppConfig};
+use infinity_database::Database;
 use infinity_error::{InfinityError, Result};
 use infinity_logger::{Logger, config::LogLevel};
 
@@ -30,6 +31,19 @@ pub(crate) fn init_logger(config: &AppConfig) -> Result<()> {
         .json(logger_config.json)
         .init()?;
     Ok(())
+}
+
+/// 连接数据库并运行迁移。
+///
+/// 连接或迁移失败都会以 [`InfinityError`] 传播，交由 `main` 统一上报。
+pub(crate) async fn init_database(config: &AppConfig) -> Result<Database> {
+    let db = Database::connect(&config.database).await?;
+    db.migrate().await?;
+    tracing::info!(
+        max_connections = config.database.max_connections,
+        "database connected and migrated"
+    );
+    Ok(db)
 }
 
 /// 把配置中的日志级别字符串解析为 [`LogLevel`]；未知级别返回配置错误。

@@ -21,7 +21,7 @@
 - [x] 为 `infinity-config` 添加 `From<ConfigError> for InfinityError` 边界转换
 - [x] 为 `infinity-logger` 添加 `From<LoggerError> for InfinityError` 边界转换
 - [x] 在 `apps/admin` 启动代码中用 `infinity_error::Result` 替换 `Box<dyn Error>`
-- [ ] `infinity-database` 具备实际功能后接入 `infinity_error`（当前为占位桩）
+- [x] `infinity-database` 具备实际功能后接入 `infinity_error`（连接池/迁移/仓储在边界转 `ErrorKind::Database`）
 - [ ] `infinity-cache` 具备实际功能后接入 `infinity_error`（当前为占位桩）
 - [ ] `infinity-web` 具备实际功能后接入 `infinity_error`（当前为占位桩）
 
