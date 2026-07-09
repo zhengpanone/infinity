@@ -5,13 +5,14 @@
 //! 后续真实的管理端实体（角色、权限等）也归入本模块。
 
 pub mod dto;
+pub mod types;
 pub mod vo;
 
 use infinity_common::ids::{TenantId, UserId};
 
 /// 管理员账户（示例领域模型）。
 #[derive(Debug)]
-pub(crate) struct Admin {
+pub struct Admin {
     /// 全局唯一的用户 ID。
     id: UserId,
     /// 所属租户 ID。
@@ -22,7 +23,7 @@ pub(crate) struct Admin {
 
 impl Admin {
     /// 创建一个新的管理员账户，自动生成用户 ID。
-    pub(crate) fn new(username: impl Into<String>, tenant: TenantId) -> Self {
+    pub fn new(username: impl Into<String>, tenant: TenantId) -> Self {
         Self {
             id: UserId::generate(),
             tenant,
@@ -31,17 +32,17 @@ impl Admin {
     }
 
     /// 用户 ID 的字符串表示。
-    pub(crate) fn id(&self) -> &str {
+    pub fn id(&self) -> &str {
         self.id.as_str()
     }
 
     /// 租户 ID 的字符串表示。
-    pub(crate) fn tenant(&self) -> &str {
+    pub fn tenant(&self) -> &str {
         self.tenant.as_str()
     }
 
     /// 登录用户名。
-    pub(crate) fn username(&self) -> &str {
+    pub fn username(&self) -> &str {
         &self.username
     }
 }

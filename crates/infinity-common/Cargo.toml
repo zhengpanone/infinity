@@ -8,3 +8,4 @@ description = "Shared domain types and traits for Infinity services"
 [dependencies]
 infinity-utils = { path = "../infinity-utils" }
 serde.workspace = true
+regex.workspace = true

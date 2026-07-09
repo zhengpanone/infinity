@@ -14,14 +14,14 @@ use infinity_logger::{Logger, config::LogLevel};
 use crate::domain::Admin;
 
 /// 从工作区 `configs/` 目录加载并校验应用配置，返回进程级 `'static` 引用。
-pub(crate) fn load_config() -> Result<&'static AppConfig> {
+pub fn load_config() -> Result<&'static AppConfig> {
     let config_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("./configs");
     let config = Config::from_dir(config_dir)?;
     Ok(config)
 }
 
 /// 根据配置初始化全局日志订阅器（控制台 + 可选 JSON）。
-pub(crate) fn init_logger(config: &AppConfig) -> Result<()> {
+pub fn init_logger(config: &AppConfig) -> Result<()> {
     let logger_config = config.logger.clone().unwrap_or_default();
     let level = parse_log_level(&logger_config.level)?;
 
@@ -36,9 +36,10 @@ pub(crate) fn init_logger(config: &AppConfig) -> Result<()> {
 /// 连接数据库并运行迁移。
 ///
 /// 连接或迁移失败都会以 [`InfinityError`] 传播，交由 `main` 统一上报。
-pub(crate) async fn init_database(config: &AppConfig) -> Result<Database> {
+pub async fn init_database(config: &AppConfig) -> Result<Database> {
     let db = Database::connect(&config.database).await?;
-    db.migrate().await?;
+    let migrate_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("./migrations");
+    db.migrate(&migrate_dir).await?;
     tracing::info!(
         max_connections = config.database.max_connections,
         "database connected and migrated"
@@ -67,7 +68,7 @@ pub(crate) fn parse_log_level(level: &str) -> Result<LogLevel> {
 /// 执行启动流程中的初始化任务。
 ///
 /// 这里仅作演示；真实实现可根据配置加载数据库、预热缓存、注册后台任务等。
-pub(crate) fn bootstrap(_config: &AppConfig, admin: &Admin) -> Result<()> {
+pub fn bootstrap(_config: &AppConfig, admin: &Admin) -> Result<()> {
     tracing::debug!(username = admin.username(), "running bootstrap tasks");
     Ok(())
 }

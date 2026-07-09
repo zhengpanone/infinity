@@ -47,3 +47,5 @@ utoipa-scalar.workspace = true
 tonic.workspace = true
 tonic-health.workspace = true
 tonic-reflection.workspace = true
+
+sqlx = { workspace = true }

@@ -1,34 +1,35 @@
-//! `AdminRepository` 集成测试（需要可用的 PostgreSQL）。
+//! Integration tests for `AdminRepository`.
 //!
-//! 数据库地址取自 `DATABASE_URL` 环境变量，未设置时回退到默认
-//! `postgres://postgres:postgres@localhost/infinity`。运行前请确保该 PG 可用，例如：
+//! These tests require a reachable PostgreSQL database. They are skipped by
+//! default unless `DATABASE_URL` is set, so normal workspace test runs do not
+//! fail on machines without a local database.
 //!
-//! ```bash
-//! DATABASE_URL=postgres://user:pass@localhost/infinity \
-//!   cargo test -p infinity-database
+//! ```powershell
+//! $env:DATABASE_URL="postgres://user:pass@localhost/infinity"
+//! cargo test -p infinity-database --test repository
 //! ```
 
 use infinity_database::Database;
 use infinity_database::repository::{AdminRecord, AdminRepository};
 
-/// 默认连接串，与 `DatabaseConfig::default()` 保持一致。
-const DEFAULT_URL: &str = "postgres://postgres:postgres@localhost/infinity";
+async fn setup() -> Option<Database> {
+    let Ok(url) = std::env::var("DATABASE_URL") else {
+        eprintln!("skipping database integration test: DATABASE_URL is not set");
+        return None;
+    };
 
-/// 连接数据库并运行迁移。
-///
-/// 直接用 `DATABASE_URL` 而非 `Config::from_dir`，避免其全局单例在多测试间冲突。
-async fn setup() -> Database {
-    let url = std::env::var("DATABASE_URL").unwrap_or_else(|_| DEFAULT_URL.to_owned());
-    let db = Database::connect_with(&url, 5)
-        .await
-        .expect("connect database");
-    db.migrate().await.expect("run migrations");
-    db
+    Some(
+        Database::connect_with(&url, 5)
+            .await
+            .expect("connect database"),
+    )
 }
 
 #[tokio::test]
 async fn insert_then_find_by_id_returns_record() {
-    let db = setup().await;
+    let Some(db) = setup().await else {
+        return;
+    };
     let repo = AdminRepository::new(&db);
 
     let record = AdminRecord {
@@ -37,7 +38,6 @@ async fn insert_then_find_by_id_returns_record() {
         username: "test-admin-1-user".to_owned(),
     };
 
-    // 幂等：先清理同 ID 记录，保证测试可重复运行。
     sqlx::query("DELETE FROM admins WHERE id = $1")
         .bind(&record.id)
         .execute(db.pool())
@@ -52,7 +52,9 @@ async fn insert_then_find_by_id_returns_record() {
 
 #[tokio::test]
 async fn find_by_id_missing_returns_none() {
-    let db = setup().await;
+    let Some(db) = setup().await else {
+        return;
+    };
     let repo = AdminRepository::new(&db);
 
     let found = repo

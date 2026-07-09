@@ -14,3 +14,4 @@
 //! [`TenantId`]: ids::TenantId
 
 pub mod ids;
+pub mod regex;

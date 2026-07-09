@@ -16,7 +16,7 @@ use infinity_error::Result;
 /// 收到关闭信号（Ctrl-C / SIGTERM）时两者一起优雅退出。
 ///
 /// 数据库句柄目前只有 HTTP 服务用到（探活与查询），gRPC 暂不需要。
-pub(crate) async fn serve_all(config: &AppConfig, db: Arc<Database>) -> Result<()> {
+pub async fn serve_all(config: &AppConfig, db: Arc<Database>) -> Result<()> {
     tracing::info!("starting HTTP and gRPC servers");
     tokio::try_join!(http::serve(config, db), grpc::serve(config))?;
     Ok(())

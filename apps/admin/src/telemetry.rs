@@ -9,7 +9,7 @@ use infinity_error::{InfinityError, field};
 ///
 /// 字段名统一取自 [`infinity_error::field`]，与工作区其余日志保持一致；
 /// 同时向 stderr 兜底输出，覆盖「日志尚未初始化」（例如配置加载失败）的窗口。
-pub(crate) fn report_fatal(err: &InfinityError) {
+pub fn report_fatal(err: &InfinityError) {
     tracing::error!(
         { field::KIND } = err.code(),
         { field::STATUS } = err.status_code(),

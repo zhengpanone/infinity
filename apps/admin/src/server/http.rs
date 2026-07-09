@@ -4,7 +4,6 @@
 //! 复用 `infinity-web` 的 [`ApiError`](infinity_web::ApiError) 统一错误响应，
 //! 通过 [`AppState`] 注入数据库句柄。优雅关闭信号来自 [`super::shutdown_signal`]。
 
-use admin::{api::http::v1_routes, handlers::ApiDoc, state::AppState};
 use axum::{
     Json, Router,
     extract::{Path, State},
@@ -25,6 +24,7 @@ use infinity_error::{ErrorKind, InfinityError, Result, ResultExt};
 use infinity_web::{ApiError, WebResult};
 
 use crate::VERSION;
+use crate::{api::http::v1_routes, handlers::ApiDoc, state::AppState};
 
 /// 健康检查响应体。
 #[derive(Debug, Serialize)]

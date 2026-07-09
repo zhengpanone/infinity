@@ -6,13 +6,12 @@ use utoipa::OpenApi;
 use crate::{domain::vo::user::UserVO, state::AppState};
 
 const TAG_NAME: &str = "User API";
-const ADMIN_TAG_NAME: &str = "Admin User API";
 
 /// 创建用户
 #[utoipa::path(
     post,
     path = "",
-    tag = ADMIN_TAG_NAME,
+    tag = TAG_NAME,
     responses(
         (status = 200, description = "创建成功", body = UserVO),
         (status = 400, description = "请求参数错误"),

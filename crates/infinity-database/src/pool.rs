@@ -1,10 +1,12 @@
 //! PostgreSQL 连接池与迁移。
 
+use std::path::Path;
 use std::time::Duration;
 
 use infinity_config::config::DatabaseConfig;
 use infinity_error::{ErrorKind, Result, ResultExt};
 use sqlx::PgPool;
+use sqlx::migrate::Migrator;
 use sqlx::postgres::PgPoolOptions;
 
 /// 获取连接的默认超时，避免地址不可达时长时间挂起。
@@ -49,8 +51,11 @@ impl Database {
     }
 
     /// 运行 `./migrations` 下的全部迁移（幂等）。
-    pub async fn migrate(&self) -> Result<()> {
-        sqlx::migrate!("./migrations")
+    pub async fn migrate(&self, migrate_dir: impl AsRef<Path>) -> Result<()> {
+        let migrator = Migrator::new(migrate_dir.as_ref())
+            .await
+            .context(ErrorKind::Database, "load migrations failed")?;
+        migrator
             .run(&self.pool)
             .await
             .context(ErrorKind::Database, "database migration failed")?;
