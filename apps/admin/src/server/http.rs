@@ -4,14 +4,19 @@
 //! 复用 `infinity-web` 的 [`ApiError`](infinity_web::ApiError) 统一错误响应，
 //! 通过 [`AppState`] 注入数据库句柄。优雅关闭信号来自 [`super::shutdown_signal`]。
 
-use std::sync::Arc;
-
+use admin::{api::http::v1_routes, handlers::ApiDoc, state::AppState};
 use axum::{
     Json, Router,
     extract::{Path, State},
     routing::get,
 };
 use serde::Serialize;
+use std::sync::Arc;
+use utoipa::OpenApi;
+use utoipa_rapidoc::RapiDoc;
+use utoipa_redoc::{Redoc, Servable};
+use utoipa_scalar::{Scalar, Servable as ScalarServable};
+use utoipa_swagger_ui::SwaggerUi;
 
 use infinity_config::config::AppConfig;
 use infinity_database::Database;
@@ -20,12 +25,6 @@ use infinity_error::{ErrorKind, InfinityError, Result, ResultExt};
 use infinity_web::{ApiError, WebResult};
 
 use crate::VERSION;
-
-/// 处理器共享状态。
-#[derive(Clone)]
-pub(crate) struct AppState {
-    db: Arc<Database>,
-}
 
 /// 健康检查响应体。
 #[derive(Debug, Serialize)]
@@ -54,14 +53,35 @@ impl From<AdminRecord> for AdminView {
     }
 }
 
-/// 构建 admin HTTP 路由并注入共享状态。
-pub(crate) fn router(state: AppState) -> Router {
-    Router::new()
+/// 构建路由器
+pub fn build_router(state: AppState) -> Router {
+    // 构建基础路由
+    let mut router = Router::new()
         .route("/", get(root))
         .route("/health", get(health))
-        .route("/admins/{id}", get(get_admin))
+        .route("/get_admin", get(get_admin))
+        .nest("/api/v1", v1_routes())
         .layer(infinity_logger::middleware::axum::trace_layer())
-        .with_state(state)
+        .fallback(not_found)
+        .with_state(state);
+    router = add_openapi_docs(router);
+    router
+}
+
+fn add_openapi_docs(router: Router) -> Router {
+    // 生成 OpenAPI文档实例
+    let openapi = ApiDoc::openapi();
+
+    router
+        // Swagger UI
+        .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", openapi.clone()))
+        .merge(Redoc::with_url("/redoc", openapi.clone()))
+        .merge(RapiDoc::new("/api-docs/openapi.json").path("/rapidoc"))
+        .merge(Scalar::with_url("/scalar", openapi))
+}
+
+async fn not_found() -> &'static str {
+    "Not Found"
 }
 
 /// 根路径：返回服务标识。
@@ -75,12 +95,11 @@ async fn root() -> &'static str {
 async fn health(State(state): State<AppState>) -> WebResult<Json<Health>> {
     if let Err(err) = infinity_database::health::ping(&state.db).await {
         tracing::warn!(error = %err, "health check: database ping failed");
-        return Err(ApiError {
-            status: 503,
-            code: err.code(),
-            message: "database unavailable".to_owned(),
-            request_id: None,
-        });
+        // 复用 from_error 填充全部字段（对 ApiError 字段增减稳健），仅覆写探针语义所需项。
+        let mut api = ApiError::from_error(&err);
+        api.status = 503;
+        api.message = "database unavailable".to_owned();
+        return Err(api);
     }
 
     Ok(Json(Health {
@@ -97,24 +116,11 @@ async fn get_admin(
     State(state): State<AppState>,
     Path(id): Path<String>,
 ) -> WebResult<Json<AdminView>> {
-    validate_admin_id(&id)?;
-
     let repo = AdminRepository::new(&state.db);
     match repo.find_by_id(&id).await? {
         Some(record) => Ok(Json(record.into())),
         None => Err(InfinityError::not_found(format!("admin:{id}")).into()),
     }
-}
-
-/// 校验管理员 ID：非空、不含路径分隔符。
-fn validate_admin_id(id: &str) -> Result<()> {
-    if id.trim().is_empty() || id.contains('/') {
-        return Err(InfinityError::validation_field(
-            "id",
-            "must be a non-empty identifier",
-        ));
-    }
-    Ok(())
 }
 
 /// 绑定配置中的 `host:port` 并启动 HTTP 服务，直到收到关闭信号后优雅退出。
@@ -127,7 +133,7 @@ pub(crate) async fn serve(config: &AppConfig, db: Arc<Database>) -> Result<()> {
     tracing::info!(addr = %addr, "admin HTTP server listening");
 
     let state = AppState { db };
-    axum::serve(listener, router(state))
+    axum::serve(listener, build_router(state))
         .with_graceful_shutdown(super::shutdown_signal())
         .await
         .context(ErrorKind::Web, "admin HTTP server error")?;
@@ -139,23 +145,6 @@ pub(crate) async fn serve(config: &AppConfig, db: Arc<Database>) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn validate_admin_id_accepts_normal_id() {
-        assert!(validate_admin_id("42").is_ok());
-    }
-
-    #[test]
-    fn validate_admin_id_rejects_blank_and_slash() {
-        assert_eq!(
-            validate_admin_id("   ").unwrap_err().kind(),
-            ErrorKind::Validation
-        );
-        assert_eq!(
-            validate_admin_id("a/b").unwrap_err().kind(),
-            ErrorKind::Validation
-        );
-    }
 
     #[test]
     fn admin_view_maps_record_fields() {

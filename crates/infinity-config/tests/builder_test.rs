@@ -1,7 +1,7 @@
 use infinity_config::{Config, ConfigError, ConfigManager, Environment, config::AppConfig};
 
 fn workspace_configs_dir() -> &'static str {
-    concat!(env!("CARGO_MANIFEST_DIR"), "/../../configs")
+    concat!(env!("CARGO_MANIFEST_DIR"), "/../../apps/admin/configs")
 }
 
 #[test]

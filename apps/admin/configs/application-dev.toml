@@ -1,0 +1,5 @@
+[database]
+url = "postgres://postgres:postgres@localhost:30432/infinity"
+
+[logger]
+level = "debug"

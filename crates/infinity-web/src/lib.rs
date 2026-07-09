@@ -1,9 +1,8 @@
 //! Infinity Web/HTTP 构建块。
 //!
 //! 该 crate 负责把工作区统一错误 [`infinity_error::InfinityError`] 映射为面向
-//! API 客户端的 HTTP 响应。核心类型 [`ApiError`] 与 [`WebResult`] 不依赖具体
-//! Web 框架；在启用默认的 `axum` feature 时，[`ApiError`] 额外实现 axum 的
-//! `IntoResponse`，可直接从 handler 返回。
+//! API 客户端的 HTTP 响应。核心类型 [`ApiError`] 与 [`WebResult`] 直接实现 axum 的
+//! `IntoResponse`，可从 handler 直接返回。
 //!
 //! ```
 //! use infinity_error::InfinityError;

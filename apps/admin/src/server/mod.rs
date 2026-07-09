@@ -3,8 +3,8 @@
 //! 承载 admin 对外提供的两种服务——HTTP（[`http`]）与 gRPC（[`grpc`]），
 //! 二者共用同一套优雅关闭信号（[`shutdown_signal`]），由 [`serve_all`] 并发驱动。
 
-pub(crate) mod grpc;
-pub(crate) mod http;
+pub mod grpc;
+pub mod http;
 
 use std::sync::Arc;
 

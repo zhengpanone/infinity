@@ -1,1 +1,33 @@
+use utoipa::OpenApi;
+
 pub mod user_handler;
+
+/// 主 API 文档
+#[derive(OpenApi)]
+#[openapi(
+    // 使用 info 配置 API 基本信息
+    info(
+        title = "系统管理文档",
+        version = "1.0.0",
+        description = "系统管理 API 文档",
+        contact(
+            name = "开发团队",
+            email = "dev@example.com"
+        ),
+        license(name = "MIT")
+    ),
+    // 使用 nest 嵌套子 API
+    nest(
+    (path = "/user", api = user_handler::UserApiDoc),
+
+    ),
+    // 服务器配置
+    servers(
+        (url = "/api/v1", description = "系统管理服务器"),
+    ),
+    // 全局安全配置
+    security(
+        ("jwt" = [])
+    )
+)]
+pub struct ApiDoc;

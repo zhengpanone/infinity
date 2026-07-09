@@ -16,7 +16,7 @@ pub struct DatabaseConfig {
 impl Default for DatabaseConfig {
     fn default() -> Self {
         Self {
-            url: "postgres://postgres:postgres@localhost/infinity".into(),
+            url: "postgres://postgres:postgres@localhost:30432/infinity".into(),
             max_connections: default_max_connections(),
         }
     }

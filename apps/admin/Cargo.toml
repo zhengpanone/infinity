@@ -26,11 +26,23 @@ infinity-utils = { path = "../../crates/infinity-utils" }
 infinity-web = { path = "../../crates/infinity-web" }
 infinity-proto = { path = "../../crates/infinity-proto" }
 infinity-database = { path = "../../crates/infinity-database" }
+
+uuid.workspace = true
+chrono.workspace = true
+
 tracing.workspace = true
 tokio.workspace = true
 axum.workspace = true
 serde.workspace = true
+serde_json.workspace = true
+
+# API Document
 utoipa.workspace = true
+utoipa-swagger-ui.workspace = true
+utoipa-axum.workspace = true
+utoipa-redoc.workspace = true
+utoipa-rapidoc.workspace = true
+utoipa-scalar.workspace = true
 # grpc
 tonic.workspace = true
 tonic-health.workspace = true

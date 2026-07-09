@@ -32,7 +32,7 @@ pub type WebResult<T> = std::result::Result<T, ApiError>;
 /// ```
 ///
 /// 当携带 Request ID 时额外包含 `"request_id"` 字段。
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, ToSchema)]
 pub struct ApiError {
     /// HTTP 状态码。
     pub status: u16,
@@ -133,7 +133,7 @@ pub struct ValidationErrorDetail {
     pub params: Option<Vec<(String, String)>>,
 }
 
-#[cfg(feature = "axum")]
+// axum 已作为必选依赖，`ApiError` 始终实现 `IntoResponse`。
 mod axum_impl {
     use super::{ApiError, REQUEST_ID_HEADER};
     use axum::{
@@ -211,7 +211,7 @@ mod tests {
     }
 }
 
-#[cfg(all(test, feature = "axum"))]
+#[cfg(test)]
 mod axum_tests {
     use super::*;
     use axum::response::IntoResponse;

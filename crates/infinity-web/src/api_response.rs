@@ -1,5 +1,5 @@
-use crate::ApiError;
 use crate::pagination::{PaginatedData, PaginationInfo, PaginationLinks};
+use crate::{ApiError, ValidationErrorDetail};
 use axum::http::HeaderValue;
 use axum::{
     Json,
@@ -7,6 +7,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use chrono::{DateTime, Utc};
+use infinity_error::InfinityError;
 
 use serde_with::skip_serializing_none;
 use std::collections::HashMap;
@@ -177,16 +178,18 @@ impl<T> ApiResponse<T> {
             meta: None,
         }
     }
-    /// 从AppError创建错误响应
-    pub fn from_app_error(error: AppError) -> Self
+    /// 从统一错误 [`InfinityError`] 创建错误响应
+    pub fn from_app_error(error: InfinityError) -> Self
     where
         T: Default,
     {
-        let status = error.status_code();
+        let status_code = error.status_code();
+        let http_status =
+            StatusCode::from_u16(status_code).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
         let api_error = ApiError {
-            status: status,
-            code: error.error_code().to_string(),
-            message: error.user_message(),
+            status: status_code,
+            code: error.code(),
+            message: error.to_string(),
             details: Some(error.to_string()),
             request_id: None,
             timestamp: Utc::now(),
@@ -196,16 +199,17 @@ impl<T> ApiResponse<T> {
             suggestion: None,
             original_error: None,
         };
-        Self::error(status, api_error)
+        Self::error(http_status, api_error)
     }
     /// 从验证错误创建响应
     pub fn from_validation_errors(errors: ValidationErrors) -> Self
     where
         T: Default,
     {
-        let validation_errors = convert_validate_errors_to_details(errors);
+        let validation_errors = convert_validation_errors_to_details(&errors);
 
         let api_error = ApiError {
+            status: StatusCode::BAD_REQUEST.as_u16(),
             code: "VALIDATION_ERROR",
             message: "请求参数验证失败".to_string(),
             details: Some("请检查输入参数".to_string()),
@@ -216,7 +220,6 @@ impl<T> ApiResponse<T> {
             documentation_url: None,
             suggestion: None,
             original_error: None,
-            status: todo!(),
         };
         Self::error(StatusCode::BAD_REQUEST, api_error)
     }
@@ -262,12 +265,12 @@ impl<T> ApiResponse<T> {
     }
 }
 
-// 为 ApiResponse 实现 From<AppResult<T>>
-impl<T> From<AppResult<T>> for ApiResponse<T>
+// 为 ApiResponse 实现 From<infinity_error::Result<T>>
+impl<T> From<infinity_error::Result<T>> for ApiResponse<T>
 where
     T: Serialize + Default + Send + Sync + 'static,
 {
-    fn from(result: AppResult<T>) -> Self {
+    fn from(result: infinity_error::Result<T>) -> Self {
         match result {
             Ok(data) => ApiResponse::success(data),
             Err(err) => ApiResponse::from_app_error(err),
@@ -295,7 +298,7 @@ where
                 if let Ok(status_code) = error.code.parse::<u16>() {
                     StatusCode::from_u16(status_code).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR)
                 } else {
-                    match error.code.as_str() {
+                    match error.code {
                         "VALIDATION_ERROR" => StatusCode::BAD_REQUEST,
                         "AUTHENTICATION_ERROR" => StatusCode::UNAUTHORIZED,
                         "AUTHORIZATION_ERROR" => StatusCode::FORBIDDEN,
@@ -380,4 +383,24 @@ where
             write!(f, "ApiResponse(success: false, error: {:?})", self.error)
         }
     }
+}
+
+/// 把 `validator` 的字段级错误展开为 [`ValidationErrorDetail`] 列表。
+fn convert_validation_errors_to_details(errors: &ValidationErrors) -> Vec<ValidationErrorDetail> {
+    errors
+        .field_errors()
+        .into_iter()
+        .flat_map(|(field, field_errors)| {
+            field_errors.iter().map(move |err| ValidationErrorDetail {
+                field: field.to_string(),
+                message: err
+                    .message
+                    .as_ref()
+                    .map(|m| m.to_string())
+                    .unwrap_or_else(|| err.code.to_string()),
+                code: err.code.to_string(),
+                params: None,
+            })
+        })
+        .collect()
 }

@@ -3,14 +3,14 @@ use infinity_config::{
 };
 
 fn workspace_configs_dir() -> &'static str {
-    concat!(env!("CARGO_MANIFEST_DIR"), "/../../configs")
+    concat!(env!("CARGO_MANIFEST_DIR"), "/../../apps/admin/configs")
 }
 
 #[test]
 fn loads_base_application_toml() {
     let config_path = concat!(
         env!("CARGO_MANIFEST_DIR"),
-        "/../../configs/application.toml"
+        "/../../apps/admin/configs/application.toml"
     );
     let config: toml::Value = loader::load_file(config_path).unwrap();
 
@@ -28,7 +28,7 @@ fn layered_dev_config_overrides_database_url() {
     assert_eq!(config.server.port, 8080);
     assert_eq!(
         config.database.url,
-        "postgres://postgres:123456@localhost/infinity"
+        "postgres://postgres:postgres@localhost:30432/infinity"
     );
     assert_eq!(config.database.max_connections, 10);
     assert_eq!(config.logger.unwrap().level, "debug");

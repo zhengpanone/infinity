@@ -4,6 +4,9 @@
 //! [`UserId`](infinity_common::ids::UserId) / [`TenantId`](infinity_common::ids::TenantId)。
 //! 后续真实的管理端实体（角色、权限等）也归入本模块。
 
+pub mod dto;
+pub mod vo;
+
 use infinity_common::ids::{TenantId, UserId};
 
 /// 管理员账户（示例领域模型）。

@@ -15,7 +15,7 @@ use crate::domain::Admin;
 
 /// 从工作区 `configs/` 目录加载并校验应用配置，返回进程级 `'static` 引用。
 pub(crate) fn load_config() -> Result<&'static AppConfig> {
-    let config_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../configs");
+    let config_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("./configs");
     let config = Config::from_dir(config_dir)?;
     Ok(config)
 }
