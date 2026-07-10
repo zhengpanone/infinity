@@ -57,4 +57,7 @@ tonic-reflection = "0.14.2"
 
 validator = { version = "0.20.0" }
 
-regex = "1.12.4"
+regex = "1.13.0"
+
+argon2 = "0.5.3"
+password-hash = { version = "0.5", features = ["rand_core", "getrandom"] }

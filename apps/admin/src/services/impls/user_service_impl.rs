@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use infinity_auth::PasswordHasher;
 use infinity_error::{InfinityError, Result};
 use std::sync::Arc;
 use tracing::info;
@@ -12,11 +13,18 @@ use crate::{
 #[derive(Clone)]
 pub struct UserServiceImpl {
     user_repository: Arc<dyn UserRepository + Send + Sync>,
+    password_hasher: Arc<dyn PasswordHasher>,
 }
 
 impl UserServiceImpl {
-    pub fn new(user_repository: Arc<dyn UserRepository + Send + Sync>) -> Self {
-        Self { user_repository }
+    pub fn new(
+        user_repository: Arc<dyn UserRepository + Send + Sync>,
+        password_hasher: Arc<dyn PasswordHasher>,
+    ) -> Self {
+        Self {
+            user_repository,
+            password_hasher,
+        }
     }
 }
 
@@ -38,7 +46,7 @@ impl UserService for UserServiceImpl {
             )));
         }
 
-        let password_hash = hash_password(&command.password)?;
+        let password_hash = self.password_hasher.hash(&command.password)?;
         let user = self
             .user_repository
             .create(NewUser {
@@ -53,16 +61,4 @@ impl UserService for UserServiceImpl {
 
         Ok(user.into())
     }
-}
-
-fn hash_password(password: &str) -> Result<String> {
-    if password.len() < 8 {
-        return Err(InfinityError::validation_field(
-            "password",
-            "password length must be at least 8",
-        ));
-    }
-
-    // TODO: replace this with argon2/bcrypt before enabling real authentication.
-    Ok(password.to_owned())
 }

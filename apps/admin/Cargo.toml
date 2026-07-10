@@ -26,6 +26,7 @@ infinity-utils = { path = "../../crates/infinity-utils" }
 infinity-web = { path = "../../crates/infinity-web" }
 infinity-proto = { path = "../../crates/infinity-proto" }
 infinity-database = { path = "../../crates/infinity-database" }
+infinity-auth = { path = "../../crates/infinity-auth" }
 
 uuid.workspace = true
 chrono.workspace = true

@@ -31,7 +31,11 @@ impl TryFrom<CreateUserDTO> for CreateUserCommand {
             display_name: dto.display_name,
             avatar_url: dto.avatar_url,
             role_ids: dto.role_ids.into_iter().map(RoleId::from).collect(),
-            permission_ids: dto.permission_ids.into_iter().map(PermissionId::from).collect(),
+            permission_ids: dto
+                .permission_ids
+                .into_iter()
+                .map(PermissionId::from)
+                .collect(),
         })
     }
 }

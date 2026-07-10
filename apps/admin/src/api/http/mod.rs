@@ -1,7 +1,4 @@
-use axum::{
-    Router,
-    routing::post,
-};
+use axum::{Router, routing::post};
 
 use crate::{handlers::user_handler::create_user, state::AppState};
 

@@ -298,8 +298,7 @@ where
             // 避免与 ErrorKind 的错误码约定重复维护而产生分歧。
             if let Some(ref error) = self.error {
                 if error.status != 0 {
-                    StatusCode::from_u16(error.status)
-                        .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR)
+                    StatusCode::from_u16(error.status).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR)
                 } else if let Ok(status_code) = error.code.parse::<u16>() {
                     StatusCode::from_u16(status_code).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR)
                 } else {
