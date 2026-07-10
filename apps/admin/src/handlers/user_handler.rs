@@ -1,9 +1,12 @@
-use axum::extract::State;
+use axum::{Json, extract::State};
 use infinity_web::{ApiResponse, WebResult};
 use tracing::debug;
 use utoipa::OpenApi;
 
-use crate::{domain::vo::user::UserVO, state::AppState};
+use crate::{
+    domain::{dto::user::CreateUserDTO, vo::user::UserVO},
+    state::AppState,
+};
 
 const TAG_NAME: &str = "User API";
 
@@ -24,12 +27,15 @@ const TAG_NAME: &str = "User API";
     )
 )]
 // // #[instrument(name="http_create_user", skip_all, fields(user_id=%auth_user.user_id))]
-pub async fn create_user(State(_state): State<AppState>) -> WebResult<ApiResponse<UserVO>> {
+pub async fn create_user(
+    State(state): State<AppState>,
+    Json(request): Json<CreateUserDTO>,
+) -> WebResult<ApiResponse<UserVO>> {
     // 检查权限
     // require_role(&auth_user, "admin")?;
     debug!("Create user:");
-
-    Ok(ApiResponse::success_empty("创建成功"))
+    let user = state.services.user_service.create_user(request).await?;
+    Ok(ApiResponse::success(user))
 }
 
 /// 管理员用户相关的 API 文档

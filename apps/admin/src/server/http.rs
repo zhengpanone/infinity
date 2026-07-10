@@ -23,7 +23,7 @@ use infinity_database::repository::{AdminRecord, AdminRepository};
 use infinity_error::{ErrorKind, InfinityError, Result, ResultExt};
 use infinity_web::{ApiError, WebResult};
 
-use crate::VERSION;
+use crate::{VERSION, repository::Repositories, services::Services};
 use crate::{api::http::v1_routes, handlers::ApiDoc, state::AppState};
 
 /// 健康检查响应体。
@@ -132,7 +132,9 @@ pub(crate) async fn serve(config: &AppConfig, db: Arc<Database>) -> Result<()> {
 
     tracing::info!(addr = %addr, "admin HTTP server listening");
 
-    let state = AppState { db };
+    let repositories = Repositories::new(db.pool().clone());
+    let services = Arc::new(Services::new(repositories));
+    let state = AppState { db, services };
     axum::serve(listener, build_router(state))
         .with_graceful_shutdown(super::shutdown_signal())
         .await

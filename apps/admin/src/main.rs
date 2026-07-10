@@ -1,8 +1,7 @@
 use std::process::ExitCode;
 use std::sync::Arc;
 
-use admin::{VERSION, domain::Admin, server, startup, telemetry};
-use infinity_common::ids::TenantId;
+use admin::{VERSION, server, startup, telemetry};
 use infinity_error::Result;
 
 fn main() -> ExitCode {
@@ -31,17 +30,8 @@ async fn run() -> Result<()> {
         "admin server config loaded"
     );
 
-    let tenant = TenantId::generate();
-    let admin = Admin::new("root", tenant);
-    tracing::info!(
-        admin_id = admin.id(),
-        tenant_id = admin.tenant(),
-        username = admin.username(),
-        "default admin account created"
-    );
-
     let started = infinity_utils::time::now_millis();
-    startup::bootstrap(config, &admin)?;
+
     let elapsed = infinity_utils::time::now_millis() - started;
     tracing::info!(elapsed_ms = elapsed, "admin bootstrap complete");
 

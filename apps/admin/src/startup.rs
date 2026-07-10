@@ -1,17 +1,9 @@
-//! 启动装配。
-//!
-//! 负责进程启动早期的一次性准备工作：加载配置、初始化日志、执行启动任务。
-//! 这些步骤都以 [`InfinityError`](infinity_error::InfinityError) 传播错误，
-//! 由 `main` 统一交给 [`crate::telemetry::report_fatal`] 处理。
-
 use std::path::PathBuf;
 
 use infinity_config::{Config, config::AppConfig};
 use infinity_database::Database;
 use infinity_error::{InfinityError, Result};
 use infinity_logger::{Logger, config::LogLevel};
-
-use crate::domain::Admin;
 
 /// 从工作区 `configs/` 目录加载并校验应用配置，返回进程级 `'static` 引用。
 pub fn load_config() -> Result<&'static AppConfig> {
@@ -63,14 +55,6 @@ pub(crate) fn parse_log_level(level: &str) -> Result<LogLevel> {
     };
 
     Ok(parsed)
-}
-
-/// 执行启动流程中的初始化任务。
-///
-/// 这里仅作演示；真实实现可根据配置加载数据库、预热缓存、注册后台任务等。
-pub fn bootstrap(_config: &AppConfig, admin: &Admin) -> Result<()> {
-    tracing::debug!(username = admin.username(), "running bootstrap tasks");
-    Ok(())
 }
 
 #[cfg(test)]

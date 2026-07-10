@@ -49,3 +49,6 @@ tonic-health.workspace = true
 tonic-reflection.workspace = true
 
 sqlx = { workspace = true }
+
+validator = { workspace = true, features = ["derive"] }
+async-trait = "0.1.89"
