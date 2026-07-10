@@ -210,7 +210,8 @@ impl<T> ApiResponse<T> {
 
         let api_error = ApiError {
             status: StatusCode::BAD_REQUEST.as_u16(),
-            code: "VALIDATION_ERROR",
+            // 与 InfinityError::Validation 走同一套错误码（"validation"）。
+            code: infinity_error::ErrorKind::Validation.code(),
             message: "请求参数验证失败".to_string(),
             details: Some("请检查输入参数".to_string()),
             request_id: None,
@@ -293,20 +294,16 @@ where
                 _ => StatusCode::OK, // 默认
             }
         } else {
-            // 从错误码解析状态码
+            // 优先采用 ApiError 权威的 status 字段；仅在缺省（0）时才回退到按 code 推断，
+            // 避免与 ErrorKind 的错误码约定重复维护而产生分歧。
             if let Some(ref error) = self.error {
-                if let Ok(status_code) = error.code.parse::<u16>() {
+                if error.status != 0 {
+                    StatusCode::from_u16(error.status)
+                        .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR)
+                } else if let Ok(status_code) = error.code.parse::<u16>() {
                     StatusCode::from_u16(status_code).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR)
                 } else {
-                    match error.code {
-                        "VALIDATION_ERROR" => StatusCode::BAD_REQUEST,
-                        "AUTHENTICATION_ERROR" => StatusCode::UNAUTHORIZED,
-                        "AUTHORIZATION_ERROR" => StatusCode::FORBIDDEN,
-                        "NOT_FOUND" => StatusCode::NOT_FOUND,
-                        "ALREADY_EXISTS" => StatusCode::CONFLICT,
-                        "RATE_LIMIT_EXCEEDED" => StatusCode::TOO_MANY_REQUESTS,
-                        _ => StatusCode::INTERNAL_SERVER_ERROR,
-                    }
+                    StatusCode::INTERNAL_SERVER_ERROR
                 }
             } else {
                 StatusCode::INTERNAL_SERVER_ERROR
@@ -386,7 +383,9 @@ where
 }
 
 /// 把 `validator` 的字段级错误展开为 [`ValidationErrorDetail`] 列表。
-fn convert_validation_errors_to_details(errors: &ValidationErrors) -> Vec<ValidationErrorDetail> {
+pub(crate) fn convert_validation_errors_to_details(
+    errors: &ValidationErrors,
+) -> Vec<ValidationErrorDetail> {
     errors
         .field_errors()
         .into_iter()

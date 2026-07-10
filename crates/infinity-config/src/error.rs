@@ -1,11 +1,10 @@
-use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 /// 配置 crate 统一使用的 Result 类型。
 pub type Result<T> = std::result::Result<T, ConfigError>;
 
 /// 配置加载、解析或校验过程中返回的错误类型。
-#[derive(Debug, Error, Serialize, Deserialize)]
+#[derive(Debug, Error)]
 pub enum ConfigError {
     /// 配置文件不存在。
     #[error("configuration file not found: {0}")]

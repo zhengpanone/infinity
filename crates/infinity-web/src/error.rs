@@ -118,6 +118,31 @@ impl From<&InfinityError> for ApiError {
     }
 }
 
+impl From<validator::ValidationErrors> for ApiError {
+    /// 把 `validator` 校验失败转换为 `400` 响应，并携带字段级错误详情。
+    ///
+    /// 让 handler 可用 `payload.validate()?` 直接把 DTO 校验结果并入 [`WebResult`]。
+    fn from(errors: validator::ValidationErrors) -> Self {
+        Self {
+            status: 400,
+            // 与 InfinityError::Validation 走同一套错误码（"validation"），
+            // 避免同为「参数校验失败」却在不同路径产出不同 code。
+            code: infinity_error::ErrorKind::Validation.code(),
+            message: "请求参数验证失败".to_owned(),
+            details: Some("请检查输入参数".to_owned()),
+            timestamp: Utc::now(),
+            validation_errors: Some(crate::api_response::convert_validation_errors_to_details(
+                &errors,
+            )),
+            stack_trace: None,
+            suggestion: None,
+            documentation_url: None,
+            original_error: None,
+            request_id: None,
+        }
+    }
+}
+
 /// 验证错误详情
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, ToSchema)]

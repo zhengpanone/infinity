@@ -136,12 +136,3 @@ fn error_conversions() {
     let config_err: ConfigError = yaml_err.into();
     assert!(matches!(config_err, ConfigError::ParseError(_)));
 }
-
-#[test]
-fn config_error_roundtrip() {
-    let original = ConfigError::ValidationError("port must be valid".to_string());
-    let json = serde_json::to_string(&original).unwrap();
-    let restored: ConfigError = serde_json::from_str(&json).unwrap();
-
-    assert_eq!(original.to_string(), restored.to_string());
-}

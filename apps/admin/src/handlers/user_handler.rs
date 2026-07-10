@@ -2,6 +2,7 @@ use axum::{Json, extract::State};
 use infinity_web::{ApiResponse, WebResult};
 use tracing::debug;
 use utoipa::OpenApi;
+use validator::Validate;
 
 use crate::{
     domain::{dto::user::CreateUserDTO, vo::user::UserVO},
@@ -34,6 +35,8 @@ pub async fn create_user(
     // 检查权限
     // require_role(&auth_user, "admin")?;
     debug!("Create user:");
+    // 先做字段级校验（长度、邮箱、URL 等），失败返回 400 及具体字段错误。
+    request.validate()?;
     let user = state.services.user_service.create_user(request).await?;
     Ok(ApiResponse::success(user))
 }
