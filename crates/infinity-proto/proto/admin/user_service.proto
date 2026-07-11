@@ -1,7 +1,7 @@
 // proto/proto/user.proto
 syntax = "proto3";
 
-package com.zp.infinity.admin;
+package infinity.admin;
 
 import "common/common.proto";
 import "google/protobuf/timestamp.proto";

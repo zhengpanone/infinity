@@ -77,6 +77,12 @@ impl UserService for UserServiceImpl {
                 let username = Username::new(&name)?;
                 self.user_repository.find_by_username(&username).await?
             }
+            UserQuery::Email(_) => {
+                todo!()
+            }
+            UserQuery::Phone(_) => {
+                todo!()
+            }
         };
 
         user.map(UserVO::from)

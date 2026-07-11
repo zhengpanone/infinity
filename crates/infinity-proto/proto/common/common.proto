@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package com.zp.infinity.common;
+package infinity.common;
 
 // 枚举类型
 enum Status{
@@ -12,4 +12,27 @@ enum Status{
 
 message CommonId{
   string id = 1;
+}
+
+// 通用过滤器
+message Filter {
+  map<string, string> equals = 1;
+  map<string, string> contains = 2;
+  map<string, RangeFilter> range = 3;
+  repeated string in_list = 4;
+  LogicalOperator operator = 5;
+  repeated Filter filters = 6;
+}
+
+message RangeFilter {
+  string min = 1;
+  bool min_inclusive = 2;
+  string max = 3;
+  bool max_inclusive = 4;
+}
+
+enum LogicalOperator {
+  LOGICAL_OPERATOR_UNSPECIFIED = 0;
+  LOGICAL_OPERATOR_AND = 1;
+  LOGICAL_OPERATOR_OR = 2;
 }

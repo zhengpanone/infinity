@@ -1,21 +1,29 @@
-// proto/admin/user.proto
-//
-// Admin 用户服务（可编译的核心版本）。
-//
-// 覆盖已在应用层落地的核心 RPC：CreateUser / GetUser。
-// 更完整的用户管理蓝图（列表、搜索、统计、批量、流式等）见 user_service.proto，
-// 待应用层能力补齐后再逐步接线。
 syntax = "proto3";
 
-package com.zp.infinity.admin.user;
+package infinity.admin.user;
 
-// 用户服务（Admin）。
+import "common/common.proto";
+import "common/pagination.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "github.com.zhengpanone/infinity/grpc/admin";
+option java_multiple_files = true;
+option java_package = "com.zp.infinity.admin.grpc.user";
+
+// 用户服务
 service UserService {
+
   // 创建用户。
   rpc CreateUser(CreateUserRequest) returns (UserResponse);
 
-  // 按 ID 或用户名获取用户。
-  rpc GetUser(GetUserRequest) returns (UserResponse);
+   // 获取用户
+  rpc GetUser(GetUserRequest) returns (UserResponse) ;
+
+  rpc GetUserById (infinity.common.CommonId) returns (UserResponse);
+
+  // 获取多个用户
+  rpc GetUsers(GetUsersRequest) returns (UserResponse);
 }
 
 // 用户视图（与应用层 UserVO 对应；时间戳采用 RFC3339 字符串，避免额外依赖）。
@@ -30,8 +38,8 @@ message User {
   bool phone_verified = 8;
   int64 login_count = 9;
   int64 failed_login_count = 10;
-  string created_at = 11;  // RFC3339
-  string updated_at = 12;  // RFC3339
+  google.protobuf.Timestamp created_at = 11;  // RFC3339
+  google.protobuf.Timestamp updated_at = 12;  // RFC3339
 }
 
 // 创建用户请求。
@@ -44,12 +52,24 @@ message CreateUserRequest {
   optional string avatar_url = 6;
 }
 
-// 获取用户请求：二选一的标识。
-message GetUserRequest {
+// 获取用户请求
+message GetUserRequest{
   oneof identifier {
     string user_id = 1;
     string username = 2;
+    string email = 3;
+    string phone = 4;
   }
+  bool include_sensitive = 5;  // 是否包含敏感信息
+  repeated string fields = 6;  // 指定返回字段
+}
+
+// 获取用户请求：二选一的标识。
+message GetUsersRequest {
+  repeated string user_ids = 1;
+  infinity.common.Filter filter =2;
+  infinity.common.PageRequest pagination = 3;
+  repeated string fields = 4;
 }
 
 // 统一用户响应。

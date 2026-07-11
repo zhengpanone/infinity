@@ -1,7 +1,8 @@
 syntax = "proto3";
 
-package microservice.common;
+package infinity.common;
 
+// 排序顺序
 enum SortOrder {
   SORT_ORDER_UNSPECIFIED = 0;
   SORT_ORDER_ASC = 1;

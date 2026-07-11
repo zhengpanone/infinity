@@ -6,15 +6,19 @@
 
 use std::sync::Arc;
 
-use infinity_proto::user::{
-    CreateUserRequest, GetUserRequest, User as ProtoUser, UserResponse,
-    get_user_request::Identifier,
-    user_service_server::{UserService as UserServiceGrpc, UserServiceServer},
+use infinity_proto::{
+    common::CommonId,
+    user::{
+        CreateUserRequest, GetUserRequest, GetUsersRequest, UserResponse,
+        get_user_request::Identifier,
+        user_service_server::{UserService as UserServiceGrpc, UserServiceServer},
+    },
 };
 use tonic::{Request, Response, Status};
 
 use crate::{
-    domain::{dto::user::CreateUserDTO, vo::user::UserVO},
+    api::grpc::converter::user_converter::UserConverter,
+    domain::dto::user::CreateUserDTO,
     services::user_service::{UserQuery, UserService},
 };
 
@@ -35,6 +39,19 @@ impl UserGrpcService {
 
 #[tonic::async_trait]
 impl UserServiceGrpc for UserGrpcService {
+    async fn get_user_by_id(
+        &self,
+        _request: Request<CommonId>,
+    ) -> Result<Response<UserResponse>, Status> {
+        todo!()
+    }
+
+    async fn get_users(
+        &self,
+        _request: Request<GetUsersRequest>,
+    ) -> Result<Response<UserResponse>, Status> {
+        todo!()
+    }
     async fn create_user(
         &self,
         request: Request<CreateUserRequest>,
@@ -60,7 +77,7 @@ impl UserServiceGrpc for UserGrpcService {
             .map_err(status_from_error)?;
 
         Ok(Response::new(UserResponse {
-            user: Some(proto_user_from_vo(vo)),
+            user: Some(UserConverter::to_proto(&vo)),
         }))
     }
 
@@ -77,7 +94,9 @@ impl UserServiceGrpc for UserGrpcService {
                     .map_err(|_| Status::invalid_argument(format!("invalid user_id: {id}")))?;
                 UserQuery::Id(uuid)
             }
+            Some(Identifier::Email(email)) => UserQuery::Email(email),
             Some(Identifier::Username(name)) => UserQuery::Username(name),
+            Some(Identifier::Phone(phone)) => UserQuery::Phone(phone),
             None => return Err(Status::invalid_argument("identifier is required")),
         };
 
@@ -88,7 +107,7 @@ impl UserServiceGrpc for UserGrpcService {
             .map_err(status_from_error)?;
 
         Ok(Response::new(UserResponse {
-            user: Some(proto_user_from_vo(vo)),
+            user: Some(UserConverter::to_proto(&vo)),
         }))
     }
 }
@@ -107,23 +126,5 @@ fn status_from_error(err: infinity_error::InfinityError) -> Status {
         ErrorKind::Unsupported => Status::unimplemented(msg),
         // 服务端错误不外泄内部细节。
         _ => Status::internal("internal server error"),
-    }
-}
-
-/// [`UserVO`] → proto `User`；时间戳统一序列化为 RFC3339 字符串。
-fn proto_user_from_vo(vo: UserVO) -> ProtoUser {
-    ProtoUser {
-        id: vo.id.to_string(),
-        username: vo.username,
-        email: vo.email,
-        phone: vo.phone,
-        display_name: vo.display_name,
-        avatar_url: vo.avatar_url,
-        email_verified: vo.email_verified,
-        phone_verified: vo.phone_verified,
-        login_count: vo.login_count,
-        failed_login_count: vo.failed_login_count,
-        created_at: vo.created_at.to_rfc3339(),
-        updated_at: vo.updated_at.to_rfc3339(),
     }
 }

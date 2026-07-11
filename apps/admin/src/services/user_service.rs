@@ -7,6 +7,8 @@ use async_trait::async_trait;
 pub enum UserQuery {
     Id(uuid::Uuid),
     Username(String),
+    Email(String),
+    Phone(String),
 }
 
 #[async_trait]

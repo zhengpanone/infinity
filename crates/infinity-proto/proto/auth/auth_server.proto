@@ -1,7 +1,7 @@
 // proto/auth_service.proto
 syntax = "proto3";
 
-package com.zp.infinity.auth;
+package infinity.auth;
 
 import "common/common.proto";
 import "user_service.proto";
