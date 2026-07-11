@@ -7,7 +7,7 @@ host = "0.0.0.0"
 port = 8080
 
 [database]
-url = "postgres://postgres:postgres@localhost/infinity"
+url = "postgres://postgres:postgres@127.0.0.1:30432/infinity"
 max_connections = 10
 
 [redis]

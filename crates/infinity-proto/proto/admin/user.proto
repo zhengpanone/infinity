@@ -1,0 +1,58 @@
+// proto/admin/user.proto
+//
+// Admin 用户服务（可编译的核心版本）。
+//
+// 覆盖已在应用层落地的核心 RPC：CreateUser / GetUser。
+// 更完整的用户管理蓝图（列表、搜索、统计、批量、流式等）见 user_service.proto，
+// 待应用层能力补齐后再逐步接线。
+syntax = "proto3";
+
+package com.zp.infinity.admin.user;
+
+// 用户服务（Admin）。
+service UserService {
+  // 创建用户。
+  rpc CreateUser(CreateUserRequest) returns (UserResponse);
+
+  // 按 ID 或用户名获取用户。
+  rpc GetUser(GetUserRequest) returns (UserResponse);
+}
+
+// 用户视图（与应用层 UserVO 对应；时间戳采用 RFC3339 字符串，避免额外依赖）。
+message User {
+  string id = 1;
+  string username = 2;
+  string email = 3;
+  optional string phone = 4;
+  string display_name = 5;
+  optional string avatar_url = 6;
+  bool email_verified = 7;
+  bool phone_verified = 8;
+  int64 login_count = 9;
+  int64 failed_login_count = 10;
+  string created_at = 11;  // RFC3339
+  string updated_at = 12;  // RFC3339
+}
+
+// 创建用户请求。
+message CreateUserRequest {
+  string username = 1;
+  string email = 2;
+  optional string phone = 3;
+  string password = 4;
+  string display_name = 5;
+  optional string avatar_url = 6;
+}
+
+// 获取用户请求：二选一的标识。
+message GetUserRequest {
+  oneof identifier {
+    string user_id = 1;
+    string username = 2;
+  }
+}
+
+// 统一用户响应。
+message UserResponse {
+  User user = 1;
+}

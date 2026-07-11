@@ -5,9 +5,14 @@ use std::sync::Arc;
 use tracing::info;
 
 use crate::{
-    domain::{command::user::CreateUserCommand, dto::user::CreateUserDTO, vo::user::UserVO},
+    domain::{
+        command::user::CreateUserCommand,
+        dto::user::CreateUserDTO,
+        types::{ids::UserId, username::Username},
+        vo::user::UserVO,
+    },
     repository::user_repository::{NewUser, UserRepository},
-    services::user_service::UserService,
+    services::user_service::{UserQuery, UserService},
 };
 
 #[derive(Clone)]
@@ -60,5 +65,21 @@ impl UserService for UserServiceImpl {
             .await?;
 
         Ok(user.into())
+    }
+
+    async fn get_user(&self, query: UserQuery) -> Result<UserVO> {
+        let user = match query {
+            UserQuery::Id(id) => {
+                let id = UserId::new(id);
+                self.user_repository.find_by_id(&id).await?
+            }
+            UserQuery::Username(name) => {
+                let username = Username::new(&name)?;
+                self.user_repository.find_by_username(&username).await?
+            }
+        };
+
+        user.map(UserVO::from)
+            .ok_or_else(|| InfinityError::not_found("user"))
     }
 }

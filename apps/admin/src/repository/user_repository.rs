@@ -1,7 +1,10 @@
 use async_trait::async_trait;
 use infinity_error::Result;
 
-use crate::{domain::types::username::Username, models::user::User};
+use crate::{
+    domain::types::{ids::UserId, username::Username},
+    models::user::User,
+};
 
 pub struct NewUser {
     pub username: Username,
@@ -14,6 +17,8 @@ pub struct NewUser {
 
 #[async_trait]
 pub trait UserRepository: Send + Sync {
+    async fn find_by_id(&self, id: &UserId) -> Result<Option<User>>;
+
     async fn find_by_username(&self, username: &Username) -> Result<Option<User>>;
 
     async fn create(&self, user: NewUser) -> Result<User>;

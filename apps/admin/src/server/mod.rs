@@ -12,13 +12,22 @@ use infinity_config::config::AppConfig;
 use infinity_database::Database;
 use infinity_error::Result;
 
+use crate::{repository::Repositories, services::Services};
+
 /// 并发启动 HTTP 与 gRPC 服务，任一出错即整体退出；
 /// 收到关闭信号（Ctrl-C / SIGTERM）时两者一起优雅退出。
 ///
-/// 数据库句柄目前只有 HTTP 服务用到（探活与查询），gRPC 暂不需要。
+/// [`Services`] 在此处装配一次，HTTP 与 gRPC 共享同一套依赖。
 pub async fn serve_all(config: &AppConfig, db: Arc<Database>) -> Result<()> {
     tracing::info!("starting HTTP and gRPC servers");
-    tokio::try_join!(http::serve(config, db), grpc::serve(config))?;
+
+    let repositories = Repositories::new(db.pool().clone());
+    let services = Arc::new(Services::new(repositories));
+
+    tokio::try_join!(
+        http::serve(config, db, services.clone()),
+        grpc::serve(config, services),
+    )?;
     Ok(())
 }
 

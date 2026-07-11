@@ -10,7 +10,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // let proto_dir = PathBuf::from("./proto");
 
     // 定义要编译的所有 proto 文件
-    let protos = &["proto/common/common.proto", "proto/admin/hello.proto"];
+    let protos = &[
+        "proto/common/common.proto",
+        "proto/admin/hello.proto",
+        "proto/admin/user.proto",
+    ];
 
     // 包含路径
     let includes = &["proto"];
