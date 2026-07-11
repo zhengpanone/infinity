@@ -24,7 +24,7 @@ use infinity_error::{ErrorKind, InfinityError, Result, ResultExt};
 use infinity_web::{ApiError, WebResult};
 
 use crate::{VERSION, services::Services};
-use crate::{api::http::v1_routes, handlers::ApiDoc, state::AppState};
+use crate::{api::http::v1::v1_routes, handlers::ApiDoc, state::AppState};
 
 /// 健康检查响应体。
 #[derive(Debug, Serialize)]

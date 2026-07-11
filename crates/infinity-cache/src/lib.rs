@@ -1,14 +1,3 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+//! Infinity 缓存抽象（占位）。
+//!
+//! 计划提供统一的缓存接口（内存 / Redis 等）与常用封装，目前尚未实现。

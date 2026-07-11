@@ -16,7 +16,6 @@ dependencies = [
  "axum",
  "chrono",
  "infinity-auth",
- "infinity-common",
  "infinity-config",
  "infinity-database",
  "infinity-error",
@@ -27,6 +26,7 @@ dependencies = [
  "prost-types",
  "serde",
  "serde_json",
+ "serde_with",
  "sqlx",
  "tokio",
  "tonic",
@@ -1268,15 +1268,6 @@ name = "infinity-cache"
 version = "0.1.0"
 
 [[package]]
-name = "infinity-common"
-version = "0.1.0"
-dependencies = [
- "infinity-utils",
- "regex",
- "serde",
-]
-
-[[package]]
 name = "infinity-config"
 version = "0.1.0"
 dependencies = [
@@ -1385,6 +1376,7 @@ dependencies = [
  "serde_json",
  "serde_with",
  "utoipa",
+ "uuid",
  "validator",
 ]
 

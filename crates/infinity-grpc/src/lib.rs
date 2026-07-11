@@ -1,14 +1,3 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+//! Infinity gRPC 支持库（占位）。
+//!
+//! 计划收敛跨服务共享的 gRPC 拦截器、错误映射与客户端封装等，目前尚未实现。

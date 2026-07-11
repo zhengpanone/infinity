@@ -2,13 +2,14 @@ use std::fmt::{self, Display, Formatter};
 
 use infinity_error::{InfinityError, Result};
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
 /// 用户名值对象
 /// 封装用户名验证规则：
 /// - 长度 3-20 个字符
 /// - 只允许字母、数字、下划线
 /// - 不能以数字开头
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, ToSchema)]
 pub struct Username(String);
 
 impl Username {

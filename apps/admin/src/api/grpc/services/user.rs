@@ -72,7 +72,7 @@ impl UserServiceGrpc for UserGrpcService {
 
         let vo = self
             .user_service
-            .create_user(dto)
+            .create(dto)
             .await
             .map_err(status_from_error)?;
 

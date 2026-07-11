@@ -4,16 +4,22 @@ use infinity_auth::{Argon2PasswordHasher, PasswordHasher};
 
 use crate::{
     repository::Repositories,
-    services::{impls::user_service_impl::UserServiceImpl, user_service::UserService},
+    services::{
+        impls::{role_service_impl::RoleServiceImpl, user_service_impl::UserServiceImpl},
+        role_service::RoleService,
+        user_service::UserService,
+    },
 };
 
 pub mod impls;
+pub mod role_service;
 pub mod user_service;
 
 // Service Factory
 #[derive(Clone)]
 pub struct Services {
     pub user_service: Arc<dyn UserService + Send + Sync>,
+    pub role_service: Arc<dyn RoleService + Send + Sync>,
 }
 
 impl Services {
@@ -24,6 +30,7 @@ impl Services {
                 repositories.user_repository,
                 password_hasher,
             )),
+            role_service: Arc::new(RoleServiceImpl::new(repositories.role_repository)),
         }
     }
 }

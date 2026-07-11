@@ -1,9 +1,20 @@
-use axum::{Router, routing::get};
+use axum::{
+    Router,
+    routing::{delete, get, post},
+};
 
-use crate::{handlers::user_handler::create_user, state::AppState};
+use crate::{
+    handlers::user_handler::{create, delete as delete_user, detail, exists, page_list, update},
+    state::AppState,
+};
 
 pub fn user_admin_routes() -> Router<AppState> {
     Router::new()
         // 管理路由
-        .route("/", get(create_user))
+        .route("/create", post(create))
+        .route("/page", post(page_list))
+        .route("/detail/{id}", get(detail))
+        .route("/update", post(update))
+        .route("/delete", delete(delete_user))
+        .route("/exists", post(exists))
 }

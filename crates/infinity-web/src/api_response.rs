@@ -124,17 +124,7 @@ impl<T> ApiResponse<T> {
     }
     /// 创建分页响应
     pub fn paginated(data: PaginatedData<T>) -> Self {
-        let pagination = PaginationInfo {
-            page: data.page,
-            page_size: data.page_size,
-            total: data.total,
-            total_pages: data.total_pages,
-            has_previous: data.has_previous,
-            has_next: data.has_next,
-            previous_page: data.previous_page,
-            next_page: data.next_page,
-            links: None,
-        };
+        let pagination = data.pagination_info();
 
         Self {
             success: true,

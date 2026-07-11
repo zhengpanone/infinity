@@ -1,5 +1,6 @@
 use utoipa::OpenApi;
 
+pub mod role_handler;
 pub mod user_handler;
 
 /// 主 API 文档
@@ -19,6 +20,7 @@ pub mod user_handler;
     // 使用 nest 嵌套子 API
     nest(
     (path = "/user", api = user_handler::UserApiDoc),
+    (path = "/role", api = role_handler::RoleApiDoc),
 
     ),
     // 服务器配置

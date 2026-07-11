@@ -27,7 +27,12 @@ pub struct User {
     pub lock_reason: Option<String>,
     pub password_changed_at: Option<DateTime<Utc>>,
     pub password_expires_at: Option<DateTime<Utc>>,
+    pub created_id: String,
     pub created_at: DateTime<Utc>,
+    pub created_by: String,
+    pub updated_id: String,
     pub updated_at: DateTime<Utc>,
+    pub updated_by: String,
+    pub is_deleted: bool,
     pub deleted_at: Option<DateTime<Utc>>,
 }

@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
@@ -55,4 +56,12 @@ impl From<User> for UserVO {
             metadata: None,
         }
     }
+}
+
+#[skip_serializing_none]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct UserExistsVO {
+    pub username_exists: Option<bool>,
+    pub email_exists: Option<bool>,
+    pub phone_exists: Option<bool>,
 }
