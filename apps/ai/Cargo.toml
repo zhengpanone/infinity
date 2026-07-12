@@ -1,5 +1,5 @@
 [package]
-name = "infinity-ai-server"
+name = "ai"
 description = "Infinity AI service server"
 version.workspace = true
 edition.workspace = true
@@ -9,7 +9,7 @@ license.workspace = true
 rust-version.workspace = true
 
 [[bin]]
-name = "ai"
+name = "infinity-ai-server"
 path = "src/main.rs"
 
 [dependencies]

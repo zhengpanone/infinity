@@ -64,6 +64,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "ai"
+version = "0.1.0"
+
+[[package]]
 name = "allocator-api2"
 version = "0.2.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -136,6 +140,10 @@ name = "atomic-waker"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0"
+
+[[package]]
+name = "auth"
+version = "0.1.0"
 
 [[package]]
 name = "autocfg"
@@ -647,6 +655,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
+name = "erp"
+version = "0.1.0"
+
+[[package]]
 name = "errno"
 version = "0.3.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -831,6 +843,10 @@ dependencies = [
  "pin-project-lite",
  "slab",
 ]
+
+[[package]]
+name = "gateway"
+version = "0.1.0"
 
 [[package]]
 name = "generic-array"
@@ -1247,10 +1263,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "infinity-ai-server"
-version = "0.1.0"
-
-[[package]]
 name = "infinity-auth"
 version = "0.1.0"
 dependencies = [
@@ -1258,10 +1270,6 @@ dependencies = [
  "infinity-error",
  "password-hash",
 ]
-
-[[package]]
-name = "infinity-auth-server"
-version = "0.1.0"
 
 [[package]]
 name = "infinity-cache"
@@ -1292,19 +1300,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "infinity-erp-server"
-version = "0.1.0"
-
-[[package]]
 name = "infinity-error"
 version = "0.1.0"
 dependencies = [
  "thiserror",
 ]
-
-[[package]]
-name = "infinity-gateway-server"
-version = "0.1.0"
 
 [[package]]
 name = "infinity-grpc"
@@ -1354,10 +1354,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "infinity-scheduler-server"
-version = "0.1.0"
-
-[[package]]
 name = "infinity-utils"
 version = "0.1.0"
 dependencies = [
@@ -1379,10 +1375,6 @@ dependencies = [
  "uuid",
  "validator",
 ]
-
-[[package]]
-name = "infinity-wms-server"
-version = "0.1.0"
 
 [[package]]
 name = "itertools"
@@ -2219,6 +2211,10 @@ checksum = "93fc1dc3aaa9bfed95e02e6eadabb4baf7e3078b0bd1b4d7b6b0b68378900502"
 dependencies = [
  "winapi-util",
 ]
+
+[[package]]
+name = "scheduler"
+version = "0.1.0"
 
 [[package]]
 name = "schemars"
@@ -3639,6 +3635,10 @@ name = "wit-bindgen"
 version = "0.57.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
+
+[[package]]
+name = "wms"
+version = "0.1.0"
 
 [[package]]
 name = "writeable"

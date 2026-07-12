@@ -1,5 +1,8 @@
 use utoipa::OpenApi;
 
+pub mod config_category_handler;
+pub mod config_group_handler;
+pub mod config_handler;
 pub mod role_handler;
 pub mod user_handler;
 
@@ -19,9 +22,11 @@ pub mod user_handler;
     ),
     // 使用 nest 嵌套子 API
     nest(
-    (path = "/user", api = user_handler::UserApiDoc),
-    (path = "/role", api = role_handler::RoleApiDoc),
-
+        (path = "/user", api = user_handler::UserApiDoc),
+        (path = "/role", api = role_handler::RoleApiDoc),
+        (path = "/config_category", api = config_category_handler::ConfigCategoryApiDoc),
+        (path = "/config_group", api = config_group_handler::ConfigGroupApiDoc),
+        (path = "/config", api = config_handler::ConfigApiDoc),
     ),
     // 服务器配置
     servers(

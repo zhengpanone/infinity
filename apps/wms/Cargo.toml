@@ -1,5 +1,5 @@
 [package]
-name = "infinity-wms-server"
+name = "wms"
 description = "Infinity WMS (warehouse management) server"
 version.workspace = true
 edition.workspace = true
@@ -9,7 +9,7 @@ license.workspace = true
 rust-version.workspace = true
 
 [[bin]]
-name = "wms"
+name = "infinity-wms-server"
 path = "src/main.rs"
 
 [dependencies]

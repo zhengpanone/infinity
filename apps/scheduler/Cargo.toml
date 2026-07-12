@@ -1,5 +1,5 @@
 [package]
-name = "infinity-scheduler-server"
+name = "scheduler"
 description = "Infinity scheduled task server"
 version.workspace = true
 edition.workspace = true
@@ -9,7 +9,7 @@ license.workspace = true
 rust-version.workspace = true
 
 [[bin]]
-name = "scheduler"
+name = "infinity-scheduler-server"
 path = "src/main.rs"
 
 [dependencies]

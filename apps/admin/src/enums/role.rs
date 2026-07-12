@@ -85,3 +85,16 @@ impl std::str::FromStr for RoleType {
         }
     }
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, sqlx::Type, ToSchema)]
+#[repr(i32)]
+pub enum UserRoleSource {
+    /// 手动分配
+    Manual = 1,
+
+    /// 自动分配
+    Auto = 2,
+
+    /// 继承
+    Inherit = 3,
+}

@@ -1,12 +1,12 @@
 [package]
-name = "infinity-auth-server"
+name = "auth"
 description = "Infinity authentication service server"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 
 [[bin]]
-name = "auth"
+name = "infinity-auth-server"
 path = "src/main.rs"
 
 [dependencies]

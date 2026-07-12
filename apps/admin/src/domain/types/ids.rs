@@ -48,4 +48,9 @@ macro_rules! define_id {
 
 define_id!(UserId);
 define_id!(RoleId);
+define_id!(SysUserRoleId);
 define_id!(PermissionId);
+
+define_id!(ConfigCategoryId);
+define_id!(ConfigGroupId);
+define_id!(ConfigId);

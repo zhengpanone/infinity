@@ -1,2 +1,11 @@
+pub mod config;
+pub mod dict;
 pub mod role;
+pub mod sys_user_role;
 pub mod user;
+pub mod sys_dict_type;
+pub mod sys_dict_item;
+pub mod sys_dict_item_i18n;
+pub mod audit;
+pub mod config_category;
+pub mod config_group;

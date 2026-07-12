@@ -1,12 +1,12 @@
 [package]
-name = "infinity-gateway-server"
+name = "gateway"
 description = "Infinity API gateway server"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 
 [[bin]]
-name = "gateway"
+name = "infinity-gateway-server"
 path = "src/main.rs"
 
 [dependencies]

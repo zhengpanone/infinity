@@ -534,3 +534,96 @@ CREATE TRIGGER set_sys_config_updated_at
     ON sys_config
     FOR EACH ROW
 EXECUTE FUNCTION trg_set_timestamp();
+
+
+CREATE TABLE sys_dict_type
+(
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    dict_code       VARCHAR(100) NOT NULL,
+    dict_name       VARCHAR(100) NOT NULL,
+
+    icon            VARCHAR(100),
+    color           VARCHAR(50),
+
+    description     TEXT,
+
+    is_builtin      BOOLEAN NOT NULL DEFAULT FALSE,
+
+    is_enabled      BOOLEAN NOT NULL DEFAULT TRUE,
+
+    order_num       INT NOT NULL DEFAULT 1,
+
+    remark          TEXT,
+
+    created_id      VARCHAR(36) NOT NULL DEFAULT '1',
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by      VARCHAR(255) NOT NULL DEFAULT 'system',
+
+    updated_id      VARCHAR(36) NOT NULL DEFAULT '1',
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_by      VARCHAR(255) NOT NULL DEFAULT 'system',
+
+    is_deleted      BOOLEAN NOT NULL DEFAULT FALSE,
+    deleted_at      TIMESTAMPTZ
+);
+
+CREATE UNIQUE INDEX uk_dict_type
+    ON sys_dict_type(dict_code)
+    WHERE is_deleted = FALSE;
+
+CREATE TABLE sys_dict_item
+(
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    dict_code       VARCHAR(100) NOT NULL,
+
+    item_code       VARCHAR(100) NOT NULL,
+
+    item_label      VARCHAR(200) NOT NULL,
+
+    item_value      VARCHAR(500) NOT NULL,
+
+    item_color      VARCHAR(50),
+
+    icon            VARCHAR(100),
+
+    css_class       VARCHAR(100),
+
+    ext_data        JSONB NOT NULL DEFAULT '{}'::jsonb,
+
+    is_default      BOOLEAN NOT NULL DEFAULT FALSE,
+
+    is_enabled      BOOLEAN NOT NULL DEFAULT TRUE,
+
+    order_num       INT NOT NULL DEFAULT 1,
+
+    remark          TEXT,
+
+    created_id      VARCHAR(36) NOT NULL DEFAULT '1',
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by      VARCHAR(255) NOT NULL DEFAULT 'system',
+
+    updated_id      VARCHAR(36) NOT NULL DEFAULT '1',
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_by      VARCHAR(255) NOT NULL DEFAULT 'system',
+
+    is_deleted      BOOLEAN NOT NULL DEFAULT FALSE,
+    deleted_at      TIMESTAMPTZ
+);
+CREATE UNIQUE INDEX uk_dict_item
+    ON sys_dict_item(dict_code,item_code)
+    WHERE is_deleted=FALSE;
+
+CREATE TABLE sys_dict_item_i18n
+(
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    item_id UUID NOT NULL,
+
+    locale VARCHAR(20) NOT NULL,
+
+    label VARCHAR(255) NOT NULL,
+
+    description TEXT
+);
