@@ -35,8 +35,8 @@ pub trait UserService: Send + Sync {
         &self,
         request: PaginationParams<UserQueryDTO, UserSortField>,
     ) -> Result<PaginatedData<Vec<UserVO>>>;
-
+    /// 获取用户详情
     async fn get_by_id(&self, id: UserId) -> Result<UserVO>;
-
+    /// 检查用户名、手机号、邮箱是否存在
     async fn check_exists(&self, request: CheckUserExistsDTO) -> Result<UserExistsVO>;
 }

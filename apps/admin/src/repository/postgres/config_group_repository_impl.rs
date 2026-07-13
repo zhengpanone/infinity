@@ -55,7 +55,7 @@ impl ConfigGroupRepository for ConfigGroupRepositoryImpl {
         Ok(saved)
     }
 
-    async fn update_by_id(&self, user: UpdateConfigGroup) -> Result<Option<ConfigGroup>> {
+    async fn update_by_id(&self, config_group: UpdateConfigGroup) -> Result<Option<ConfigGroup>> {
         todo!()
     }
 

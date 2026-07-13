@@ -1,6 +1,6 @@
 use axum::{
-    extract::{Path, State},
     Json,
+    extract::{Path, State},
 };
 use infinity_web::{ApiResponse, CommonIdDTO, PaginationParams, WebResult};
 use utoipa::OpenApi;
@@ -8,21 +8,17 @@ use uuid::Uuid;
 
 use crate::{
     domain::{
-        dto::{
-            config::{ConfigQueryDTO, ConfigSortField, CreateConfigDTO},
-            user::{CheckUserExistsDTO, UpdateUserDTO},
+        dto::config::{
+            CheckConfigExistsDTO, ConfigQueryDTO, ConfigSortField, CreateConfigDTO, UpdateConfigDTO,
         },
-        vo::{
-            config::ConfigVO,
-            user::{UserExistsVO, UserVO},
-        },
+        vo::config::{ConfigExistsVO, ConfigVO},
     },
     state::AppState,
 };
 
 const TAG_NAME: &str = "Config API";
 
-/// 创建配置
+/// 创建系统配置
 #[utoipa::path(
     post,
     path = "/create",
@@ -33,7 +29,7 @@ const TAG_NAME: &str = "Config API";
         content_type = "application/json"
     ),
     responses(
-        (status = 200, description = "创建成功", body = ApiResponse),
+        (status = 200, description = "创建成功", body = ApiResponse<ConfigVO>),
         (status = 400, description = "请求参数错误"),
         (status = 401, description = "未授权"),
         (status = 403, description = "权限不足"),
@@ -46,11 +42,12 @@ const TAG_NAME: &str = "Config API";
 pub async fn create(
     State(state): State<AppState>,
     Json(request): Json<CreateConfigDTO>,
-) -> WebResult<ApiResponse<()>> {
-    Ok(ApiResponse::success(()))
+) -> WebResult<ApiResponse<ConfigVO>> {
+    // Ok(ApiResponse::success(()))
+    todo!()
 }
 
-/// 分页查询用户
+/// 分页查询系统配置
 #[utoipa::path(
     post,
     path = "/page",
@@ -79,17 +76,17 @@ pub async fn page_list(
     todo!()
 }
 
-/// 查询用户详情
+/// 查询系统配置详情
 #[utoipa::path(
     get,
     path = "/detail/{id}",
     tag = TAG_NAME,
     params(
-        ("id" = Uuid, Path, description = "用户 ID")
+        ("id" = Uuid, Path, description = "系统配置 ID")
     ),
     responses(
-        (status = 200, description = "查询成功", body = ApiResponse<UserVO>),
-        (status = 400, description = "用户 ID 格式错误"),
+        (status = 200, description = "查询成功", body = ApiResponse<ConfigVO>),
+        (status = 400, description = "系统配置 ID 格式错误"),
         (status = 401, description = "未认证"),
         (status = 403, description = "权限不足"),
         (status = 404, description = "用户不存在"),
@@ -102,22 +99,23 @@ pub async fn page_list(
 pub async fn detail(
     State(state): State<AppState>,
     Path(id): Path<Uuid>,
-) -> WebResult<ApiResponse<()>> {
-    Ok(ApiResponse::success(()))
+) -> WebResult<ApiResponse<ConfigVO>> {
+    // Ok(ApiResponse::success(()))
+    todo!()
 }
 
-/// 更新用户
+/// 更新系统配置
 #[utoipa::path(
     post,
     path = "/update",
     tag = TAG_NAME,
     request_body(
-        content = UpdateUserDTO,
+        content = UpdateConfigDTO,
         description = "用户更新参数",
         content_type = "application/json"
     ),
     responses(
-        (status = 200, description = "更新成功", body = ApiResponse<UserVO>),
+        (status = 200, description = "更新成功", body = ApiResponse<ConfigVO>),
         (status = 400, description = "请求参数错误"),
         (status = 401, description = "未授权"),
         (status = 403, description = "权限不足"),
@@ -130,19 +128,20 @@ pub async fn detail(
 )]
 pub async fn update(
     State(state): State<AppState>,
-    Json(request): Json<()>,
-) -> WebResult<ApiResponse<()>> {
-    Ok(ApiResponse::success(()))
+    Json(request): Json<UpdateConfigDTO>,
+) -> WebResult<ApiResponse<ConfigVO>> {
+    // Ok(ApiResponse::success(()))
+    todo!()
 }
 
-/// 删除用户
+/// 删除系统配置
 #[utoipa::path(
     delete,
     path = "/delete",
     tag = TAG_NAME,
     request_body(
         content = CommonIdDTO,
-        description = "待删除的用户 ID 列表",
+        description = "待删除的系统配置 ID 列表",
         content_type = "application/json"
     ),
     responses(
@@ -163,18 +162,18 @@ pub async fn delete(
     Ok(ApiResponse::success_empty("删除成功"))
 }
 
-/// 校验邮箱或者用户名是否存在
+/// 校验系统配置是否存在
 #[utoipa::path(
     post,
     path = "/exists",
     tag = TAG_NAME,
     request_body(
-        content = CheckUserExistsDTO,
+        content = CheckConfigExistsDTO,
         description = "校验用户名、邮箱、手机号是否已存在",
         content_type = "application/json"
     ),
     responses(
-        (status = 204, description = "查询成功", body = ApiResponse<UserExistsVO>),
+        (status = 204, description = "查询成功", body = ApiResponse<ConfigExistsVO>),
         (status = 400, description = "请求参数错误"),
         (status = 401, description = "未授权"),
         (status = 403, description = "权限不足"),
@@ -184,11 +183,15 @@ pub async fn delete(
         ("jwt" = [])
     )
 )]
-pub async fn exists(State(state): State<AppState>) -> WebResult<ApiResponse<()>> {
-    Ok(ApiResponse::success(()))
+pub async fn exists(
+    State(state): State<AppState>,
+    Json(request): Json<CheckConfigExistsDTO>,
+) -> WebResult<ApiResponse<ConfigExistsVO>> {
+    // Ok(ApiResponse::success(()))
+    todo!()
 }
 
-/// 配置相关的 API 文档
+/// 系统配置相关的 API 文档
 #[derive(OpenApi)]
 #[openapi(
     paths(create, page_list, detail, update, delete,exists),

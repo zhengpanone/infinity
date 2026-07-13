@@ -54,3 +54,6 @@ define_id!(PermissionId);
 define_id!(ConfigCategoryId);
 define_id!(ConfigGroupId);
 define_id!(ConfigId);
+
+define_id!(DictTypeId);
+define_id!(DictItemId);

@@ -1,8 +1,8 @@
-use chrono::{DateTime, Utc};
-use serde_json::Value;
 use infinity_error::Result;
 use infinity_web::{PaginatedData, PaginationParams};
+use serde_json::Value;
 
+use crate::enums::config::{ConfigHint, ConfigType};
 use crate::{
     domain::{
         dto::config_category::{ConfigCategoryQueryDTO, ConfigCategorySortField},
@@ -10,7 +10,6 @@ use crate::{
     },
     models::config::Config,
 };
-use crate::enums::config::{ConfigHint, ConfigType};
 
 pub struct NewConfig {
 
@@ -129,7 +128,9 @@ pub struct UpdateConfig {
 
 #[async_trait::async_trait]
 pub trait ConfigRepository: Send + Sync {
+
     async fn create(&self, param: NewConfig) -> Result<Config>;
+
     async fn update_by_id(&self, user: UpdateConfig) -> Result<Option<Config>>;
 
     async fn soft_delete(&self, ids: &[ConfigId]) -> Result<u64>;

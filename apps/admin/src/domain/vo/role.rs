@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
@@ -23,4 +24,12 @@ impl From<Role> for RoleVO {
             role_type: role.role_type.to_string(),
         }
     }
+}
+
+#[skip_serializing_none]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct RoleExistsVO {
+    pub username_exists: Option<bool>,
+    pub email_exists: Option<bool>,
+    pub phone_exists: Option<bool>,
 }

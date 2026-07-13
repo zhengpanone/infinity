@@ -9,30 +9,37 @@ use utoipa::OpenApi;
 use uuid::Uuid;
 use validator::Validate;
 
-use crate::domain::{
-    dto::config_group::{
-        CheckConfigGroupExistsDTO, ConfigGroupQueryDTO, ConfigGroupSortField, CreateConfigGroupDTO,
-        UpdateConfigGroupDTO,
-    },
-    types::ids::ConfigGroupId,
-    vo::config_group::{ConfigGroupExistsVO, ConfigGroupVO},
+use crate::domain::dto::dict_type::{
+    CheckDictTypeExistsDTO, CreateDictTypeDTO, DictTypeQueryDTO, DictTypeSortField,
+    UpdateDictTypeDTO,
 };
-use crate::state::AppState;
+use crate::domain::types::ids::{ConfigCategoryId, DictTypeId};
+use crate::domain::vo::dict_type::{DictTypeExistsVO, DictTypeVO};
+use crate::{
+    domain::{
+        dto::config_category::{
+            CheckConfigCategoryExistsDTO, ConfigCategoryQueryDTO, ConfigCategorySortField,
+            CreateConfigCategoryDTO, UpdateConfigCategoryDTO,
+        },
+        vo::config_category::{ConfigCategoryExistsVO, ConfigCategoryVO},
+    },
+    state::AppState,
+};
 
-const TAG_NAME: &str = "ConfigGroup API";
+const TAG_NAME: &str = "DictType API";
 
-/// 创建系统配置-二级分类
+/// 创建字典类型
 #[utoipa::path(
     post,
     path = "/create",
     tag = TAG_NAME,
     request_body(
-        content = CreateConfigGroupDTO,
-        description = "创建系统配置分组参数",
+        content = CreateDictTypeDTO,
+        description = "创建字典类型参数",
         content_type = "application/json"
     ),
     responses(
-        (status = 200, description = "创建成功", body = ApiResponse<ConfigGroupVO>),
+        (status = 200, description = "创建成功", body = ApiResponse<DictTypeVO>),
         (status = 400, description = "请求参数错误"),
         (status = 401, description = "未授权"),
         (status = 403, description = "权限不足"),
@@ -44,29 +51,26 @@ const TAG_NAME: &str = "ConfigGroup API";
 )]
 pub async fn create(
     State(state): State<AppState>,
-    Json(request): Json<CreateConfigGroupDTO>,
-) -> WebResult<ApiResponse<ConfigGroupVO>> {
-    // 检查权限
-    // require_role(&auth_user, "admin")?;
-    debug!("Create user:");
-    // 先做字段级校验（长度、邮箱、URL 等），失败返回 400 及具体字段错误。
+    Json(request): Json<CreateDictTypeDTO>,
+) -> WebResult<ApiResponse<DictTypeVO>> {
+    debug!("Create Config Category:");
     request.validate()?;
-    let config_group = state.services.config_group_service.create(request).await?;
-    Ok(ApiResponse::success(config_group))
+    let user = state.services.dict_type_service.create(request).await?;
+    Ok(ApiResponse::success(user))
 }
 
-/// 分页查询系统配置分组
+/// 分页查询系统配置-分类
 #[utoipa::path(
     post,
     path = "/page",
     tag = TAG_NAME,
     request_body(
-        content = PaginationParams<ConfigGroupQueryDTO, ConfigGroupSortField>,
-        description = "用户分页、筛选及多字段排序参数",
+        content = PaginationParams<ConfigCategoryQueryDTO, ConfigCategorySortField>,
+        description = "系统配置分类分页、筛选及多字段排序参数",
         content_type = "application/json"
     ),
     responses(
-        (status = 200, description = "查询成功", body = ApiResponse<Vec<ConfigGroupVO>>),
+        (status = 200, description = "查询成功", body = ApiResponse<Vec<ConfigCategoryVO>>),
         (status = 400, description = "分页、筛选或排序参数错误"),
         (status = 401, description = "未认证"),
         (status = 403, description = "权限不足"),
@@ -78,27 +82,23 @@ pub async fn create(
 )]
 pub async fn page_list(
     State(state): State<AppState>,
-    Json(request): Json<PaginationParams<ConfigGroupQueryDTO, ConfigGroupSortField>>,
-) -> WebResult<ApiResponse<Vec<ConfigGroupVO>>> {
+    Json(request): Json<PaginationParams<DictTypeQueryDTO, DictTypeSortField>>,
+) -> WebResult<ApiResponse<Vec<DictTypeVO>>> {
     request.validate().map_err(InfinityError::validation)?;
-    let pagination = state
-        .services
-        .config_group_service
-        .page_list(request)
-        .await?;
+    let pagination = state.services.dict_type_service.page_list(request).await?;
     Ok(ApiResponse::paginated(pagination))
 }
 
-/// 查询系统配置分组详情
+/// 查询系统配置-分类详情
 #[utoipa::path(
     get,
     path = "/detail/{id}",
     tag = TAG_NAME,
     params(
-        ("id" = Uuid, Path, description = "用户 ID")
+        ("id" = Uuid, Path, description = "系统配置-分类 ID")
     ),
     responses(
-        (status = 200, description = "查询成功", body = ApiResponse<ConfigGroupVO>),
+        (status = 200, description = "查询成功", body = ApiResponse<ConfigCategoryVO>),
         (status = 400, description = "用户 ID 格式错误"),
         (status = 401, description = "未认证"),
         (status = 403, description = "权限不足"),
@@ -112,27 +112,27 @@ pub async fn page_list(
 pub async fn detail(
     State(state): State<AppState>,
     Path(id): Path<Uuid>,
-) -> WebResult<ApiResponse<ConfigGroupVO>> {
-    let config_group = state
+) -> WebResult<ApiResponse<DictTypeVO>> {
+    let config_category = state
         .services
-        .config_group_service
-        .get_by_id(ConfigGroupId::from(id))
+        .dict_type_service
+        .get_by_id(DictTypeId::from(id))
         .await?;
-    Ok(ApiResponse::success(config_group))
+    Ok(ApiResponse::success(config_category))
 }
 
-/// 更新系统配置分组
+/// 更新系统配置-分类
 #[utoipa::path(
     post,
     path = "/update",
     tag = TAG_NAME,
     request_body(
-        content = UpdateConfigGroupDTO,
-        description = "用户更新参数",
+        content = UpdateConfigCategoryDTO,
+        description = "系统配置-分类更新参数",
         content_type = "application/json"
     ),
     responses(
-        (status = 200, description = "更新成功", body = ApiResponse<ConfigGroupVO>),
+        (status = 200, description = "更新成功", body = ApiResponse<DictTypeVO>),
         (status = 400, description = "请求参数错误"),
         (status = 401, description = "未授权"),
         (status = 403, description = "权限不足"),
@@ -145,21 +145,21 @@ pub async fn detail(
 )]
 pub async fn update(
     State(state): State<AppState>,
-    Json(request): Json<UpdateConfigGroupDTO>,
-) -> WebResult<ApiResponse<ConfigGroupVO>> {
+    Json(request): Json<UpdateDictTypeDTO>,
+) -> WebResult<ApiResponse<DictTypeVO>> {
     request.validate()?;
-    let user = state.services.config_group_service.update(request).await?;
-    Ok(ApiResponse::success(user))
+    let config_category = state.services.dict_type_service.update(request).await?;
+    Ok(ApiResponse::success(config_category))
 }
 
-/// 删除系统配置分组
+/// 删除系统配置-分类
 #[utoipa::path(
     delete,
     path = "/delete",
     tag = TAG_NAME,
     request_body(
         content = CommonIdDTO,
-        description = "待删除的系统分组 ID 列表",
+        description = "待删除的系统配置-分类 ID 列表",
         content_type = "application/json"
     ),
     responses(
@@ -182,25 +182,25 @@ pub async fn delete(
     let ids = request
         .ids
         .into_iter()
-        .map(ConfigGroupId::from)
+        .map(DictTypeId::from)
         .collect::<Vec<_>>();
 
-    state.services.config_group_service.delete(ids).await?;
+    state.services.dict_type_service.delete(ids).await?;
     Ok(ApiResponse::success_empty("删除成功"))
 }
 
-/// 校验系统分组是否存在
+/// 校验分类编码是否存在
 #[utoipa::path(
     post,
     path = "/exists",
     tag = TAG_NAME,
     request_body(
-        content = CheckConfigGroupExistsDTO,
-        description = "校验系统配置-二级分类是否已存在",
+        content = CheckDictTypeExistsDTO,
+        description = "校验分类编码是否已存在",
         content_type = "application/json"
     ),
     responses(
-        (status = 204, description = "查询成功", body = ApiResponse<ConfigGroupExistsVO>),
+        (status = 204, description = "查询成功", body = ApiResponse<ConfigCategoryExistsVO>),
         (status = 400, description = "请求参数错误"),
         (status = 401, description = "未授权"),
         (status = 403, description = "权限不足"),
@@ -212,24 +212,24 @@ pub async fn delete(
 )]
 pub async fn exists(
     State(state): State<AppState>,
-    Json(request): Json<CheckConfigGroupExistsDTO>,
-) -> WebResult<ApiResponse<ConfigGroupExistsVO>> {
+    Json(request): Json<CheckDictTypeExistsDTO>,
+) -> WebResult<ApiResponse<DictTypeExistsVO>> {
     request.validate()?;
 
     let result = state
         .services
-        .config_group_service
+        .dict_type_service
         .check_exists(request)
         .await?;
 
     Ok(ApiResponse::success(result))
 }
 
-/// 管理员系统分组相关的 API 文档
+/// 字典类型的 API 文档
 #[derive(OpenApi)]
 #[openapi(
-    paths(create, page_list, detail, update, delete,exists),
-    components(schemas(ConfigGroupVO,ConfigGroupExistsVO)),
-    tags((name = TAG_NAME, description = "Config Group management")),
+    paths(create, page_list, detail, update, delete, exists),
+    components(schemas(ConfigCategoryVO, ConfigCategoryExistsVO)),
+    tags((name = TAG_NAME, description = "Config Category management")),
 )]
-pub struct ConfigGroupApiDoc;
+pub struct DictTypeApiDoc;

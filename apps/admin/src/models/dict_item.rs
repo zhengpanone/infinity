@@ -6,13 +6,17 @@ use sqlx::FromRow;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
+/// 字典项
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow, ToSchema)]
 pub struct SysDictItem {
     /// 字典项ID
     pub id: Uuid,
 
     /// 字典类型ID
-    pub dict_type_id: Uuid,
+    pub dict_id: Uuid,
+
+    /// 字典类型编码
+    pub dict_code: String,
 
     /// 字典项编码
     pub item_code: String,

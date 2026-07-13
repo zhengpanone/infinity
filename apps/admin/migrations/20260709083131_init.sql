@@ -572,24 +572,39 @@ CREATE UNIQUE INDEX uk_dict_type
     ON sys_dict_type(dict_code)
     WHERE is_deleted = FALSE;
 
+COMMENT ON TABLE  sys_dict_type                 IS '字典类型表';
+COMMENT ON COLUMN sys_dict_type.id              IS '字典类型ID';
+COMMENT ON COLUMN sys_dict_type.dict_code       IS '字典编码';
+COMMENT ON COLUMN sys_dict_type.dict_name       IS '字典名称';
+COMMENT ON COLUMN sys_dict_type.icon            IS '图标';
+COMMENT ON COLUMN sys_dict_type.color           IS '主题颜色';
+COMMENT ON COLUMN sys_dict_type.description     IS '描述';
+COMMENT ON COLUMN sys_dict_type.is_builtin      IS '是否系统内置';
+COMMENT ON COLUMN sys_dict_type.is_enabled      IS '是否启用';
+COMMENT ON COLUMN sys_dict_type.order_num       IS '排序';
+COMMENT ON COLUMN sys_dict_type.remark          IS '备注';
+COMMENT ON COLUMN sys_dict_type.created_id      IS '创建人ID';
+COMMENT ON COLUMN sys_dict_type.created_at      IS '创建时间';
+COMMENT ON COLUMN sys_dict_type.created_by      IS '创建人';
+COMMENT ON COLUMN sys_dict_type.updated_id      IS '最后修改人ID';
+COMMENT ON COLUMN sys_dict_type.updated_at      IS '更新时间';
+COMMENT ON COLUMN sys_dict_type.updated_by      IS '最后修改人';
+COMMENT ON COLUMN sys_dict_type.is_deleted      IS '是否已删除';
+COMMENT ON COLUMN sys_dict_type.deleted_at      IS '软删除时间';
+
 CREATE TABLE sys_dict_item
 (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
+    dict_id       VARCHAR(100) NOT NULL,
     dict_code       VARCHAR(100) NOT NULL,
 
     item_code       VARCHAR(100) NOT NULL,
-
     item_label      VARCHAR(200) NOT NULL,
-
     item_value      VARCHAR(500) NOT NULL,
-
     item_color      VARCHAR(50),
-
     icon            VARCHAR(100),
-
     css_class       VARCHAR(100),
-
     ext_data        JSONB NOT NULL DEFAULT '{}'::jsonb,
 
     is_default      BOOLEAN NOT NULL DEFAULT FALSE,
@@ -615,6 +630,30 @@ CREATE UNIQUE INDEX uk_dict_item
     ON sys_dict_item(dict_code,item_code)
     WHERE is_deleted=FALSE;
 
+COMMENT ON TABLE  sys_dict_item                 IS '字典项表';
+COMMENT ON COLUMN sys_dict_item.id              IS '字典项ID';
+COMMENT ON COLUMN sys_dict_item.dict_id         IS '字典类型ID';
+COMMENT ON COLUMN sys_dict_item.dict_code       IS '字典类型编码';
+COMMENT ON COLUMN sys_dict_item.item_code       IS '字典项编码';
+COMMENT ON COLUMN sys_dict_item.item_label      IS '字典项名称';
+COMMENT ON COLUMN sys_dict_item.item_value      IS '字典值';
+COMMENT ON COLUMN sys_dict_item.item_color      IS '标签颜色';
+COMMENT ON COLUMN sys_dict_item.icon            IS '图标';
+COMMENT ON COLUMN sys_dict_item.css_class       IS 'CSS样式';
+COMMENT ON COLUMN sys_dict_item.ext_data        IS '扩展属性';
+COMMENT ON COLUMN sys_dict_item.is_default      IS '是否默认';
+COMMENT ON COLUMN sys_dict_item.is_enabled      IS '是否启用';
+COMMENT ON COLUMN sys_dict_item.order_num       IS '排序';
+COMMENT ON COLUMN sys_dict_item.remark          IS '备注';
+COMMENT ON COLUMN sys_dict_item.created_id      IS '创建人ID';
+COMMENT ON COLUMN sys_dict_item.created_at      IS '创建时间';
+COMMENT ON COLUMN sys_dict_item.created_by      IS '创建人';
+COMMENT ON COLUMN sys_dict_item.updated_id      IS '最后修改人ID';
+COMMENT ON COLUMN sys_dict_item.updated_at      IS '更新时间';
+COMMENT ON COLUMN sys_dict_item.updated_by      IS '最后修改人';
+COMMENT ON COLUMN sys_dict_item.is_deleted      IS '是否已删除';
+COMMENT ON COLUMN sys_dict_item.deleted_at      IS '软删除时间';
+
 CREATE TABLE sys_dict_item_i18n
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -627,3 +666,10 @@ CREATE TABLE sys_dict_item_i18n
 
     description TEXT
 );
+
+COMMENT ON TABLE  sys_dict_item_i18n            IS '字典项国际化表';
+COMMENT ON COLUMN sys_dict_item_i18n.id         IS '配置ID';
+COMMENT ON COLUMN sys_dict_item_i18n.item_id    IS '一级分类编码';
+COMMENT ON COLUMN sys_dict_item_i18n.locale          IS '一级分类编码';
+COMMENT ON COLUMN sys_dict_item_i18n.label           IS '一级分类编码';
+COMMENT ON COLUMN sys_dict_item_i18n.description     IS '一级分类编码';

@@ -1,11 +1,14 @@
 use infinity_error::{ErrorKind, Result, ResultExt};
 use sqlx::PgPool;
-
+use infinity_web::{PaginatedData, PaginationParams};
 use crate::{
     domain::types::RoleId,
     models::role::Role,
     repository::role_repository::{NewRole, RoleRepository},
 };
+use crate::domain::dto::role::{CheckRoleExistsDTO, RoleQueryDTO, RoleSortField};
+use crate::domain::vo::role::RoleExistsVO;
+use crate::repository::role_repository::UpdateRole;
 
 /// `sys_role` 全字段列，展开为字符串字面量，供查询/返回复用。
 macro_rules! role_columns {
@@ -49,5 +52,25 @@ impl RoleRepository for RoleRepositoryImpl {
         .await
         .context(ErrorKind::Database, "failed to create role")?;
         Ok(saved)
+    }
+
+    async fn find_by_id(&self, id: &RoleId) -> Result<Option<Role>> {
+        todo!()
+    }
+
+    async fn update_by_id(&self, user: UpdateRole) -> Result<Option<Role>> {
+        todo!()
+    }
+
+    async fn soft_delete(&self, ids: &[RoleId]) -> Result<u64> {
+        todo!()
+    }
+
+    async fn page_list(&self, query: PaginationParams<RoleQueryDTO, RoleSortField>) -> Result<PaginatedData<Vec<Role>>> {
+        todo!()
+    }
+
+    async fn check_exists(&self, query: &CheckRoleExistsDTO) -> Result<RoleExistsVO> {
+        todo!()
     }
 }

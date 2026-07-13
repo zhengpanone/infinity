@@ -3,7 +3,6 @@ use crate::domain::types::{RoleId, UserId};
 use crate::enums::role::UserRoleSource;
 use chrono::{DateTime, Utc};
 use sqlx::FromRow;
-use uuid::Uuid;
 
 #[derive(Debug, Clone, FromRow)]
 pub struct SysUserRole {

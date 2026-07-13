@@ -2,6 +2,15 @@ use std::sync::Arc;
 
 use sqlx::PgPool;
 
+use crate::repository::config_group_repository::ConfigGroupRepository;
+use crate::repository::config_repository::ConfigRepository;
+use crate::repository::dict_item_repository::DictItemRepository;
+use crate::repository::dict_type_repository::DictTypeRepository;
+use crate::repository::postgres::config_category_repository_impl::ConfigCategoryRepositoryImpl;
+use crate::repository::postgres::config_group_repository_impl::ConfigGroupRepositoryImpl;
+use crate::repository::postgres::config_repository_impl::ConfigRepositoryImpl;
+use crate::repository::postgres::dict_item_repository_impl::DictItemRepositoryImpl;
+use crate::repository::postgres::dict_type_repository_impl::DictTypeRepositoryImpl;
 use crate::repository::{
     config_category_repository::ConfigCategoryRepository,
     postgres::{
@@ -10,15 +19,12 @@ use crate::repository::{
     role_repository::RoleRepository,
     user_repository::UserRepository,
 };
-use crate::repository::config_group_repository::ConfigGroupRepository;
-use crate::repository::config_repository::ConfigRepository;
-use crate::repository::postgres::config_category_repository_impl::ConfigCategoryRepositoryImpl;
-use crate::repository::postgres::config_group_repository_impl::ConfigGroupRepositoryImpl;
-use crate::repository::postgres::config_repository_impl::ConfigRepositoryImpl;
 
 pub mod config_category_repository;
 pub mod config_group_repository;
 pub mod config_repository;
+pub mod dict_item_repository;
+pub mod dict_type_repository;
 pub mod postgres;
 pub mod role_repository;
 pub mod user_repository;
@@ -30,6 +36,8 @@ pub struct Repositories {
     pub config_category_repository: Arc<dyn ConfigCategoryRepository + Send + Sync>,
     pub config_group_repository: Arc<dyn ConfigGroupRepository + Send + Sync>,
     pub config_repository: Arc<dyn ConfigRepository + Send + Sync>,
+    pub dict_type_repository: Arc<dyn DictTypeRepository + Send + Sync>,
+    pub dict_item_repository: Arc<dyn DictItemRepository + Send + Sync>,
 }
 
 impl Repositories {
@@ -43,6 +51,8 @@ impl Repositories {
             config_category_repository: Arc::new(ConfigCategoryRepositoryImpl::new(pool.clone())),
             config_group_repository: Arc::new(ConfigGroupRepositoryImpl::new(pool.clone())),
             config_repository: Arc::new(ConfigRepositoryImpl::new(pool.clone())),
+            dict_type_repository: Arc::new(DictTypeRepositoryImpl::new(pool.clone())),
+            dict_item_repository: Arc::new(DictItemRepositoryImpl::new(pool.clone())),
         }
     }
 }

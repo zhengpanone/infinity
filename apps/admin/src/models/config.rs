@@ -4,15 +4,16 @@ use sqlx::prelude::FromRow;
 
 use crate::enums::config::{ConfigHint, ConfigType};
 
+/// 系统配置
 #[derive(Debug, Clone, FromRow)]
 pub struct Config {
     /// 配置ID
     pub id: String,
 
-    /// 一级分类编码
+    /// 分类编码
     pub category_code: String,
 
-    /// 二级分组编码
+    /// 分组编码
     pub group_code: String,
 
     /// 配置Key

@@ -4,52 +4,37 @@ use utoipa::ToSchema;
 use validator::Validate;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Validate, ToSchema)]
-pub struct CreateConfigGroupDTO {}
+pub struct CreateDictItemDTO {}
 
 #[derive(Debug, Clone, Serialize, Deserialize, Validate, ToSchema)]
-pub struct UpdateConfigGroupDTO {}
+pub struct UpdateDictItemDTO {}
 
 #[skip_serializing_none]
 #[derive(Debug, Clone, Default, Serialize, Deserialize, ToSchema)]
-pub struct ConfigGroupQueryDTO {
-    #[schema(example = "admin")]
-    pub username: Option<String>,
-    #[schema(example = "admin@qq.com")]
-    pub email: Option<String>,
-    #[schema(example = "15527300572")]
-    pub phone: Option<String>,
-}
+pub struct DictItemQueryDTO {}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "snake_case")]
-pub enum ConfigGroupSortField {
+pub enum DictItemSortField {
     #[default]
-    Username,
+    DictItemCode,
     CreateTime,
 }
 
-impl ConfigGroupSortField {
+impl DictItemSortField {
     pub const fn as_sql(self) -> &'static str {
         match self {
-            Self::Username => "username",
+            Self::DictItemCode => "category_code",
             Self::CreateTime => "created_at",
         }
     }
 }
 
-
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize, Validate, ToSchema)]
-pub struct CheckConfigGroupExistsDTO {
+pub struct CheckDictItemExistsDTO {
     /// 分类编码
     #[schema(example = "admin")]
     #[validate(length(min = 3, max = 50))]
-    pub category_code: String,
-
-    /// 分组编码
-    #[schema(example = "admin@qq.com")]
-    #[validate(length(max = 100))]
-    pub group_code: String,
-
-   
+    pub category_code: Option<String>,
 }

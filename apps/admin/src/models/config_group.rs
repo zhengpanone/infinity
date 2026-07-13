@@ -1,12 +1,13 @@
 use chrono::{DateTime, Utc};
 use sqlx::prelude::FromRow;
 
+/// 系统配置-分组
 #[derive(Debug, Clone, FromRow)]
 pub struct ConfigGroup {
     /// 分组ID
     pub id: String,
 
-    /// 一级分类编码
+    /// 分类编码
     pub category_code: String,
 
     /// 分组编码

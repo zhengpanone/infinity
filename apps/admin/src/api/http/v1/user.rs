@@ -8,7 +8,7 @@ use crate::{
     state::AppState,
 };
 
-pub fn user_admin_routes() -> Router<AppState> {
+pub fn user_routes() -> Router<AppState> {
     Router::new()
         // 管理路由
         .route("/create", post(create))

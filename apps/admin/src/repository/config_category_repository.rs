@@ -63,7 +63,9 @@ pub struct UpdateConfigCategory {
 
 #[async_trait::async_trait]
 pub trait ConfigCategoryRepository: Send + Sync {
+    
     async fn create(&self, param: NewConfigCategory) -> Result<ConfigCategory>;
+    
     async fn update_by_id(&self, user: UpdateConfigCategory) -> Result<Option<Category>>;
 
     async fn soft_delete(&self, ids: &[ConfigCategoryId]) -> Result<u64>;

@@ -3,6 +3,8 @@ use utoipa::OpenApi;
 pub mod config_category_handler;
 pub mod config_group_handler;
 pub mod config_handler;
+pub mod dict_item_handler;
+pub mod dict_type_handler;
 pub mod role_handler;
 pub mod user_handler;
 
@@ -27,6 +29,8 @@ pub mod user_handler;
         (path = "/config_category", api = config_category_handler::ConfigCategoryApiDoc),
         (path = "/config_group", api = config_group_handler::ConfigGroupApiDoc),
         (path = "/config", api = config_handler::ConfigApiDoc),
+        (path = "/dict_type", api = dict_type_handler::DictTypeApiDoc),
+        (path = "/dict_item", api = dict_item_handler::DictItemApiDoc),
     ),
     // 服务器配置
     servers(

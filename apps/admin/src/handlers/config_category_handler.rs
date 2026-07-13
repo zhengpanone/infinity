@@ -9,31 +9,28 @@ use utoipa::OpenApi;
 use uuid::Uuid;
 use validator::Validate;
 
+use crate::domain::types::ids::ConfigCategoryId;
 use crate::{
     domain::{
-        dto::{
-            config_category::CreateConfigCategoryDTO,
-            user::{CheckUserExistsDTO, CreateUserDTO, UpdateUserDTO, UserQueryDTO, UserSortField},
+        dto::config_category::{
+            CheckConfigCategoryExistsDTO, ConfigCategoryQueryDTO, ConfigCategorySortField,
+            CreateConfigCategoryDTO, UpdateConfigCategoryDTO,
         },
-        types::ids::UserId,
-        vo::{
-            config_category::ConfigCategoryVO,
-            user::{UserExistsVO, UserVO},
-        },
+        vo::config_category::{ConfigCategoryExistsVO, ConfigCategoryVO},
     },
     state::AppState,
 };
 
 const TAG_NAME: &str = "ConfigCategory API";
 
-/// 创建系统配置-一级分类
+/// 创建系统配置-分类
 #[utoipa::path(
     post,
     path = "/create",
     tag = TAG_NAME,
     request_body(
         content = CreateConfigCategoryDTO,
-        description = "创建系统配置-一级分类参数",
+        description = "创建系统配置-分类参数",
         content_type = "application/json"
     ),
     responses(
@@ -51,10 +48,7 @@ pub async fn create(
     State(state): State<AppState>,
     Json(request): Json<CreateConfigCategoryDTO>,
 ) -> WebResult<ApiResponse<ConfigCategoryVO>> {
-    // 检查权限
-    // require_role(&auth_user, "admin")?;
-    debug!("Create user:");
-    // 先做字段级校验（长度、邮箱、URL 等），失败返回 400 及具体字段错误。
+    debug!("Create Config Category:");
     request.validate()?;
     let user = state
         .services
@@ -64,18 +58,18 @@ pub async fn create(
     Ok(ApiResponse::success(user))
 }
 
-/// 分页查询用户
+/// 分页查询系统配置-分类
 #[utoipa::path(
     post,
     path = "/page",
     tag = TAG_NAME,
     request_body(
-        content = PaginationParams<UserQueryDTO, UserSortField>,
-        description = "用户分页、筛选及多字段排序参数",
+        content = PaginationParams<ConfigCategoryQueryDTO, ConfigCategorySortField>,
+        description = "系统配置分类分页、筛选及多字段排序参数",
         content_type = "application/json"
     ),
     responses(
-        (status = 200, description = "查询成功", body = ApiResponse<Vec<UserVO>>),
+        (status = 200, description = "查询成功", body = ApiResponse<Vec<ConfigCategoryVO>>),
         (status = 400, description = "分页、筛选或排序参数错误"),
         (status = 401, description = "未认证"),
         (status = 403, description = "权限不足"),
@@ -87,23 +81,27 @@ pub async fn create(
 )]
 pub async fn page_list(
     State(state): State<AppState>,
-    Json(request): Json<PaginationParams<UserQueryDTO, UserSortField>>,
-) -> WebResult<ApiResponse<Vec<UserVO>>> {
+    Json(request): Json<PaginationParams<ConfigCategoryQueryDTO, ConfigCategorySortField>>,
+) -> WebResult<ApiResponse<Vec<ConfigCategoryVO>>> {
     request.validate().map_err(InfinityError::validation)?;
-    let pagination = state.services.user_service.page_list(request).await?;
+    let pagination = state
+        .services
+        .config_category_service
+        .page_list(request)
+        .await?;
     Ok(ApiResponse::paginated(pagination))
 }
 
-/// 查询用户详情
+/// 查询系统配置-分类详情
 #[utoipa::path(
     get,
     path = "/detail/{id}",
     tag = TAG_NAME,
     params(
-        ("id" = Uuid, Path, description = "用户 ID")
+        ("id" = Uuid, Path, description = "系统配置-分类 ID")
     ),
     responses(
-        (status = 200, description = "查询成功", body = ApiResponse<UserVO>),
+        (status = 200, description = "查询成功", body = ApiResponse<ConfigCategoryVO>),
         (status = 400, description = "用户 ID 格式错误"),
         (status = 401, description = "未认证"),
         (status = 403, description = "权限不足"),
@@ -117,27 +115,27 @@ pub async fn page_list(
 pub async fn detail(
     State(state): State<AppState>,
     Path(id): Path<Uuid>,
-) -> WebResult<ApiResponse<UserVO>> {
-    let user = state
+) -> WebResult<ApiResponse<ConfigCategoryVO>> {
+    let config_category = state
         .services
-        .user_service
-        .get_by_id(UserId::from(id))
+        .config_category_service
+        .get_by_id(ConfigCategoryId::from(id))
         .await?;
-    Ok(ApiResponse::success(user))
+    Ok(ApiResponse::success(config_category))
 }
 
-/// 更新用户
+/// 更新系统配置-分类
 #[utoipa::path(
     post,
     path = "/update",
     tag = TAG_NAME,
     request_body(
-        content = UpdateUserDTO,
-        description = "用户更新参数",
+        content = UpdateConfigCategoryDTO,
+        description = "系统配置-分类更新参数",
         content_type = "application/json"
     ),
     responses(
-        (status = 200, description = "更新成功", body = ApiResponse<UserVO>),
+        (status = 200, description = "更新成功", body = ApiResponse<ConfigCategoryVO>),
         (status = 400, description = "请求参数错误"),
         (status = 401, description = "未授权"),
         (status = 403, description = "权限不足"),
@@ -150,21 +148,25 @@ pub async fn detail(
 )]
 pub async fn update(
     State(state): State<AppState>,
-    Json(request): Json<UpdateUserDTO>,
-) -> WebResult<ApiResponse<UserVO>> {
+    Json(request): Json<UpdateConfigCategoryDTO>,
+) -> WebResult<ApiResponse<ConfigCategoryVO>> {
     request.validate()?;
-    let user = state.services.user_service.update(request).await?;
-    Ok(ApiResponse::success(user))
+    let config_category = state
+        .services
+        .config_category_service
+        .update(request)
+        .await?;
+    Ok(ApiResponse::success(config_category))
 }
 
-/// 删除用户
+/// 删除系统配置-分类
 #[utoipa::path(
     delete,
     path = "/delete",
     tag = TAG_NAME,
     request_body(
         content = CommonIdDTO,
-        description = "待删除的用户 ID 列表",
+        description = "待删除的系统配置-分类 ID 列表",
         content_type = "application/json"
     ),
     responses(
@@ -187,25 +189,25 @@ pub async fn delete(
     let ids = request
         .ids
         .into_iter()
-        .map(UserId::from)
+        .map(ConfigCategoryId::from)
         .collect::<Vec<_>>();
 
-    state.services.user_service.delete(ids).await?;
+    state.services.config_category_service.delete(ids).await?;
     Ok(ApiResponse::success_empty("删除成功"))
 }
 
-/// 校验邮箱或者用户名是否存在
+/// 校验分类编码是否存在
 #[utoipa::path(
     post,
     path = "/exists",
     tag = TAG_NAME,
     request_body(
-        content = CheckUserExistsDTO,
-        description = "校验用户名、邮箱、手机号是否已存在",
+        content = CheckConfigCategoryExistsDTO,
+        description = "校验分类编码是否已存在",
         content_type = "application/json"
     ),
     responses(
-        (status = 204, description = "查询成功", body = ApiResponse<UserExistsVO>),
+        (status = 204, description = "查询成功", body = ApiResponse<ConfigCategoryExistsVO>),
         (status = 400, description = "请求参数错误"),
         (status = 401, description = "未授权"),
         (status = 403, description = "权限不足"),
@@ -217,20 +219,24 @@ pub async fn delete(
 )]
 pub async fn exists(
     State(state): State<AppState>,
-    Json(request): Json<CheckUserExistsDTO>,
-) -> WebResult<ApiResponse<UserExistsVO>> {
+    Json(request): Json<CheckConfigCategoryExistsDTO>,
+) -> WebResult<ApiResponse<ConfigCategoryExistsVO>> {
     request.validate()?;
 
-    let result = state.services.user_service.check_exists(request).await?;
+    let result = state
+        .services
+        .config_category_service
+        .check_exists(request)
+        .await?;
 
     Ok(ApiResponse::success(result))
 }
 
-/// 管理员用户相关的 API 文档
+/// 系统配置-分类的 API 文档
 #[derive(OpenApi)]
 #[openapi(
-    paths(create, page_list, detail, update, delete,exists),
-    components(schemas(UserVO,UserExistsVO)),
-    tags((name = TAG_NAME, description = "User management")),
+    paths(create, page_list, detail, update, delete, exists),
+    components(schemas(ConfigCategoryVO, ConfigCategoryExistsVO)),
+    tags((name = TAG_NAME, description = "Config Category management")),
 )]
 pub struct ConfigCategoryApiDoc;
