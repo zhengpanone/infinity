@@ -59,3 +59,10 @@ regex = "1.13.0"
 
 argon2 = "0.5.3"
 password-hash = { version = "0.5", features = ["rand_core", "getrandom"] }
+
+async-trait = "0.1.89"
+tower = "0.5"
+
+# 审计日志哈希链
+sha2 = "0.10"
+hex = "0.4"

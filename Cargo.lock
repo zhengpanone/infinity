@@ -1263,6 +1263,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "infinity-audit"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "axum",
+ "chrono",
+ "hex",
+ "infinity-database",
+ "infinity-error",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "sqlx",
+ "tokio",
+ "tower",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
 name = "infinity-auth"
 version = "0.1.0"
 dependencies = [
