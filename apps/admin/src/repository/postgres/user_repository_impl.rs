@@ -328,11 +328,12 @@ fn push_user_filters(builder: &mut QueryBuilder<Postgres>, filters: &UserQueryDT
 }
 
 fn push_user_sorts(builder: &mut QueryBuilder<Postgres>, sorts: &[SortRule<UserSortField>]) {
+    builder.push(" ORDER BY ");
     if sorts.is_empty() {
-        builder.push(" ORDER BY username ASC, created_at DESC, id ASC");
+        builder.push("username ASC, created_at DESC, id ASC");
         return;
     }
-    builder.push(" ORDER BY ");
+   
 
     for (index, sort) in sorts.iter().enumerate() {
         if index > 0 {
