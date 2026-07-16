@@ -1,10 +1,11 @@
 use crate::domain::dto::config_category::{ConfigCategoryQueryDTO, ConfigCategorySortField};
 use crate::domain::types::ids::ConfigCategoryId;
-use crate::repository::config_category_repository::UpdateConfigCategory;
+use crate::repository::config_category_repository::{
+    CheckConfigCategoryExists, ConfigCategoryExistsResult, UpdateConfigCategory,
+};
 use crate::repository::config_category_repository::{ConfigCategoryRepository, NewConfigCategory};
 use infinity_error::{ErrorKind, InfinityError, Result, ResultExt};
 use infinity_web::{PaginatedData, PaginationParams, SortRule};
-use serde_json::error::Category;
 use sqlx::{PgPool, Postgres, QueryBuilder};
 
 use crate::models::config_category::ConfigCategory;
@@ -166,6 +167,38 @@ impl ConfigCategoryRepository for ConfigCategoryRepositoryImpl {
 
         PaginatedData::try_new(config_categories, query.page_num, query.page_size, total)
             .map_err(InfinityError::validation)
+    }
+
+    async fn check_exists(
+        &self,
+        query: &CheckConfigCategoryExists,
+    ) -> Result<ConfigCategoryExistsResult> {
+        let category_code = query.category_code.as_ref().map(|value| value.as_str());
+
+        let exclude_id = query
+            .exclude_category_id
+            .as_ref()
+            .map(ConfigCategoryId::as_uuid);
+        let result: (Option<bool>,) = sqlx::query_as(
+            r#"SELECT
+                CASE WHEN $1::VARCHAR IS NULL THEN NULL
+                ELSE EXISTS (
+                    SELECT 1
+                    FROM sys_config_category
+                    WHERE category_code = $1
+                    AND is_deleted = FALSE
+                    AND ($2::UUID IS NULL OR id <> $2)
+                ) END AS category_code_exists
+               "#,
+        )
+        .bind(category_code)
+        .bind(exclude_id)
+        .fetch_one(&self.pool)
+        .await
+        .context(ErrorKind::Database, "failed to check user exists")?;
+        Ok(ConfigCategoryExistsResult {
+            category_code_exists: result.0,
+        })
     }
 }
 

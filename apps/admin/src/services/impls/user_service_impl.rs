@@ -89,7 +89,7 @@ impl UserService for UserServiceImpl {
             .user_repository
             .update_by_id(UpdateUser {
                 id,
-                username: username,
+                username,
                 email: request.email.map(Email::try_from).transpose()?,
                 phone: request.phone.map(|value| Phone::new(&value)).transpose()?,
                 password: password_hash,

@@ -71,5 +71,5 @@ impl From<ConfigCategory> for ConfigCategoryVO {
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct ConfigCategoryExistsVO {
-    pub category_code_exists: bool,
+    pub category_code_exists: Option<bool>,
 }
