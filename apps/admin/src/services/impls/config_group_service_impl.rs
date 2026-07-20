@@ -1,7 +1,7 @@
 use crate::domain::dto::config_group::{CheckConfigGroupExistsDTO, ConfigGroupQueryDTO, ConfigGroupSortField, CreateConfigGroupDTO, UpdateConfigGroupDTO};
 use crate::domain::types::ids::ConfigGroupId;
 use crate::domain::vo::config_group::{ConfigGroupExistsVO, ConfigGroupVO};
-use crate::repository::config_group_repository::ConfigGroupRepository;
+use crate::repository::config_group_repository::{ConfigGroupRepository, NewConfigGroup};
 use crate::services::config_group_service::ConfigGroupService;
 use infinity_web::{PaginatedData, PaginationParams};
 use std::sync::Arc;
@@ -21,7 +21,19 @@ impl ConfigGroupServiceImpl {
 #[async_trait::async_trait]
 impl ConfigGroupService for ConfigGroupServiceImpl {
     async fn create(&self, request: CreateConfigGroupDTO) -> infinity_error::Result<ConfigGroupVO> {
-        todo!()
+        let config_group = self
+            .config_group_repository
+            .create(NewConfigGroup{
+                category_code: request.category_code,
+                group_code: request.group_code,
+                group_name: request.group_name,
+                icon: request.icon,
+                order_num: request.order_num,
+                remark: request.remark,
+                group_desc: request.group_desc,
+                is_builtin: request.is_builtin,
+            }).await?;
+       Ok(config_group.into())
     }
 
     async fn delete(&self, ids: Vec<ConfigGroupId>) -> infinity_error::Result<()> {

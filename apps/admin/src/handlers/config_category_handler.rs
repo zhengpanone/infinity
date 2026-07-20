@@ -50,12 +50,13 @@ pub async fn create(
 ) -> WebResult<ApiResponse<ConfigCategoryVO>> {
     debug!("Create Config Category:");
     request.validate()?;
-    let user = state
+    let config_category = state
         .services
         .config_category_service
         .create(request)
         .await?;
-    Ok(ApiResponse::success(user))
+    debug!("Create Config Category: {:?}", config_category);
+    Ok(ApiResponse::success(config_category))
 }
 
 /// 分页查询系统配置-分类

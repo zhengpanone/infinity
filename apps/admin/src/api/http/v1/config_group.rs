@@ -1,10 +1,10 @@
-use crate::handlers::config_category_handler::create;
+
 use crate::state::AppState;
 use axum::{
     Router,
     routing::{delete, get, post},
 };
-use crate::handlers::config_group_handler::{detail, exists, page_list, update,delete as delete_config_group};
+use crate::handlers::config_group_handler::{create,detail, exists, page_list, update,delete as delete_config_group};
 
 pub fn config_group_routes() -> Router<AppState> {
     Router::new()

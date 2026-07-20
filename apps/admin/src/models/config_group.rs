@@ -1,11 +1,12 @@
 use chrono::{DateTime, Utc};
 use sqlx::prelude::FromRow;
+use crate::domain::types::ids::ConfigGroupId;
 
 /// 系统配置-分组
 #[derive(Debug, Clone, FromRow)]
 pub struct ConfigGroup {
     /// 分组ID
-    pub id: String,
+    pub id: ConfigGroupId,
 
     /// 分类编码
     pub category_code: String,

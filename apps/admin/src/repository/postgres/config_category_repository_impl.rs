@@ -7,7 +7,7 @@ use crate::repository::config_category_repository::{ConfigCategoryRepository, Ne
 use infinity_error::{ErrorKind, InfinityError, Result, ResultExt};
 use infinity_web::{PaginatedData, PaginationParams, SortRule};
 use sqlx::{PgPool, Postgres, QueryBuilder};
-
+use tracing::debug;
 use crate::models::config_category::ConfigCategory;
 
 /// `sys_role` 全字段列，展开为字符串字面量，供查询/返回复用。
@@ -36,8 +36,7 @@ impl ConfigCategoryRepository for ConfigCategoryRepositoryImpl {
     async fn create(&self, config_category: NewConfigCategory) -> Result<ConfigCategory> {
         let saved = sqlx::query_as::<_, ConfigCategory>(concat!(
             r#"INSERT INTO sys_config_category (
-                id, category_code, category_name, icon, color, order_num, remark,
-                category_desc, is_builtin,
+                id, category_code, category_name, icon, color, order_num, remark, category_desc, is_builtin
             ) VALUES (
                 $1, $2, $3, $4, $5, $6, $7, $8, $9
             ) RETURNING "#,

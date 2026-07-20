@@ -1,6 +1,7 @@
 **/target
 **/logs
 logs/
+.idea/
 
 # tonic/prost 每次构建生成的描述符副本（构建产物，源自 OUT_DIR，无需入库）
 **/grpc_descriptor.bin

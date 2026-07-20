@@ -332,7 +332,7 @@ $$;
 
 CREATE TABLE IF NOT EXISTS sys_config_category
 (
-    id              VARCHAR(36) PRIMARY KEY DEFAULT gen_random_uuid(),
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     category_code   VARCHAR(100) NOT NULL,
     category_name   VARCHAR(100) NOT NULL,
@@ -391,7 +391,7 @@ CREATE INDEX idx_config_category_deleted
 
 CREATE TABLE IF NOT EXISTS sys_config_group
 (
-    id              VARCHAR(36) PRIMARY KEY DEFAULT gen_random_uuid(),
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     category_code   VARCHAR(100) NOT NULL,
     group_code      VARCHAR(100) NOT NULL,
@@ -448,7 +448,7 @@ EXECUTE FUNCTION trg_set_timestamp();
 
 CREATE TABLE IF NOT EXISTS sys_config
 (
-    id              VARCHAR(36) PRIMARY KEY DEFAULT gen_random_uuid(),
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     category_code   VARCHAR(100) NOT NULL,
     group_code      VARCHAR(100) NOT NULL,

@@ -34,18 +34,19 @@ impl ConfigCategoryServiceImpl {
 #[async_trait]
 impl ConfigCategoryService for ConfigCategoryServiceImpl {
     async fn create(&self, request: CreateConfigCategoryDTO) -> Result<ConfigCategoryVO> {
+      let config_category =  NewConfigCategory {
+            category_code: request.category_code,
+            category_name: request.category_name,
+            icon: request.icon,
+            color: request.color,
+            order_num: request.order_num,
+            remark: request.remark,
+            category_desc: request.category_desc,
+            is_builtin: request.is_builtin,
+        };
         let config_category = self
             .config_category_repository
-            .create(NewConfigCategory {
-                category_code: request.category_code,
-                category_name: request.category_name,
-                icon: request.icon,
-                color: request.color,
-                order_num: request.order_num,
-                remark: request.remark,
-                category_desc: request.category_desc,
-                is_builtin: request.is_builtin,
-            })
+            .create(config_category)
             .await?;
         Ok(config_category.into())
     }

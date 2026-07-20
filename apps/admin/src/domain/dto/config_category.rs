@@ -3,6 +3,7 @@ use serde_with::skip_serializing_none;
 use utoipa::ToSchema;
 use uuid::Uuid;
 use validator::Validate;
+use infinity_utils::bool_from_int;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Validate, ToSchema)]
 pub struct CreateConfigCategoryDTO {
@@ -42,6 +43,7 @@ pub struct CreateConfigCategoryDTO {
 
     /// 是否系统内置
     #[schema(example = "1")]
+    #[serde(deserialize_with = "bool_from_int")]
     pub is_builtin: bool,
 }
 

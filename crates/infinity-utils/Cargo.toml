@@ -11,3 +11,4 @@ description = "Domain-agnostic utility helpers for Infinity (time, id, ...)"
 [dependencies]
 uuid.workspace = true
 chrono.workspace = true
+serde = "1.0.228"
