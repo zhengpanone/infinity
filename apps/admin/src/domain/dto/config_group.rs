@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use utoipa::ToSchema;
+use uuid::Uuid;
 use validator::Validate;
 use infinity_utils::bool_from_int;
 
@@ -47,7 +48,10 @@ pub struct CreateConfigGroupDTO {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Validate, ToSchema)]
-pub struct UpdateConfigGroupDTO {}
+pub struct UpdateConfigGroupDTO {
+    pub id: Uuid,
+
+}
 
 #[skip_serializing_none]
 #[derive(Debug, Clone, Default, Serialize, Deserialize, ToSchema)]

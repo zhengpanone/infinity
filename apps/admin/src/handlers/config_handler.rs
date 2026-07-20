@@ -5,7 +5,7 @@ use axum::{
 use infinity_web::{ApiResponse, CommonIdDTO, PaginationParams, WebResult};
 use utoipa::OpenApi;
 use uuid::Uuid;
-
+use validator::Validate;
 use crate::{
     domain::{
         dto::config::{
@@ -43,8 +43,9 @@ pub async fn create(
     State(state): State<AppState>,
     Json(request): Json<CreateConfigDTO>,
 ) -> WebResult<ApiResponse<ConfigVO>> {
-    // Ok(ApiResponse::success(()))
-    todo!()
+    request.validate()?;
+    let config = state.services.config_service.create(request).await?;
+    Ok(ApiResponse::success(config))
 }
 
 /// 分页查询系统配置

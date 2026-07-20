@@ -1,10 +1,31 @@
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use serde_with::skip_serializing_none;
 use utoipa::ToSchema;
 use validator::Validate;
+use crate::enums::config::{ConfigHint, ConfigType};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Validate, ToSchema)]
-pub struct CreateConfigDTO {}
+pub struct CreateConfigDTO {
+    pub category_code: String,
+    pub group_code: String,
+    pub config_key: String,
+    pub config_name: String,
+    pub config_value: Option<String>,
+    pub default_value: Option<String>,
+    pub config_type: ConfigType,
+    pub value_hint: ConfigHint,
+    pub value_unit: Option<String>,
+    pub validation_rule: Option<String>,
+    pub is_visible: bool,
+    pub is_editable: bool,
+    pub is_builtin: bool,
+    pub is_encrypted: bool,
+    pub version: i64,
+    pub order_num: i32,
+    pub remark: Option<String>,
+    pub options: Value,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize, Validate, ToSchema)]
 pub struct UpdateConfigDTO {}

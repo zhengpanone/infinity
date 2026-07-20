@@ -1,5 +1,5 @@
 use crate::domain::dto::config_category::{ConfigCategoryQueryDTO, ConfigCategorySortField};
-use crate::domain::types::ids::ConfigCategoryId;
+use crate::domain::types::ids::{ConfigCategoryId, ConfigGroupId};
 use crate::models::config_group::ConfigGroup;
 use crate::repository::config_group_repository::{
     ConfigGroupRepository, NewConfigGroup, UpdateConfigGroup,
@@ -59,11 +59,11 @@ impl ConfigGroupRepository for ConfigGroupRepositoryImpl {
         todo!()
     }
 
-    async fn soft_delete(&self, ids: &[ConfigCategoryId]) -> Result<u64> {
+    async fn soft_delete(&self, ids: &[ConfigGroupId]) -> Result<u64> {
         todo!()
     }
 
-    async fn find_by_id(&self, id: &ConfigCategoryId) -> Result<Option<ConfigGroup>> {
+    async fn find_by_id(&self, id: &ConfigGroupId) -> Result<Option<ConfigGroup>> {
         todo!()
     }
 

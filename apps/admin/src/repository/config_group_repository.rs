@@ -6,6 +6,7 @@ use crate::domain::{
     dto::config_category::{ConfigCategoryQueryDTO, ConfigCategorySortField},
     types::ids::ConfigCategoryId,
 };
+use crate::domain::types::ids::ConfigGroupId;
 
 pub struct NewConfigGroup {
 
@@ -35,7 +36,7 @@ pub struct NewConfigGroup {
 }
 
 pub struct UpdateConfigGroup {
-    pub id: ConfigCategoryId,
+    pub id: ConfigGroupId,
 }
 
 #[async_trait::async_trait]
@@ -45,9 +46,9 @@ pub trait ConfigGroupRepository: Send + Sync {
 
     async fn update_by_id(&self, user: UpdateConfigGroup) -> Result<Option<ConfigGroup>>;
 
-    async fn soft_delete(&self, ids: &[ConfigCategoryId]) -> Result<u64>;
+    async fn soft_delete(&self, ids: &[ConfigGroupId]) -> Result<u64>;
 
-    async fn find_by_id(&self, id: &ConfigCategoryId) -> Result<Option<ConfigGroup>>;
+    async fn find_by_id(&self, id: &ConfigGroupId) -> Result<Option<ConfigGroup>>;
 
     async fn page_list(
         &self,
