@@ -1,0 +1,19 @@
+[workspace]
+resolver = "3"
+members = ["apps/*", "crates/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+authors = ["Infinity Team"]
+repository = "https://github.com/zhengpanone/infinity"
+license = "MIT"
+
+
+[workspace.dependencies]
+axum = "0.8.9"
+tokio = { version = "1.53.1", features = ["full"] }
+uuid = { version = "1.27.0", features = ["serde", "v4"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
